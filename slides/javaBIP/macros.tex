@@ -1,0 +1,337 @@
+\newenvironment{remark}{{\bf\textcolor{Gray}{Remark
+%\arabic{def}
+    \,}}}
+{\textcolor{Gray}{{\ \hfill $\Box$\\ 
+%\stepcounter{def}
+}}}
+
+\newcommand{\blue}[1]{\textcolor{blue}{#1}}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\green}[1]{\textcolor{green}{#1}}
+\newcommand{\true}{\texttt{true}}
+\newcommand{\false}{\texttt{false}}
+
+\newcommand{\imp}{\Rightarrow}
+\newcommand{\ev}{\equiv}
+\newcommand{\notincluded}{\textcolor{red}{NOT INCLUDED}}
+
+\newlength{\tablesepp}
+\setlength{\tablesepp}{0.05in}
+
+\newcommand{\ind}{\hspace*{1.5em}}
+\newcommand{\T}{\mbox{\rm T}}
+\newcommand{\F}{\mbox{\rm F}}
+\newcommand{\AND}{\textbf{and }}
+
+%% LOGICAL QUANTIFIERS
+\newcommand{\A}{\ensuremath{\mathbf{\forall}}}
+\newcommand{\E}{\ensuremath{\exists}}
+\newcommand{\LQ}{\mbox{${\bf LQ}$}\xspace}
+
+
+%% ARITHMETIC QUANTIFIERS
+\renewcommand{\S}{\ensuremath{\Sigma}}
+\renewcommand{\P}{\ensuremath{\Pi}}
+\newcommand{\N}{\mbox{${\bf N}$}\xspace}
+\newcommand{\AQ}{\mbox{${\bf AQ}$}\xspace}
+\newcommand{\MAX}{\mbox{${\bf MAX}$}\xspace}
+\newcommand{\MIN}{\mbox{${\bf MIN}$}\xspace}
+
+%% QUANTIFIERS
+\newcommand{\Q}{\mbox{${\bf Q}$}\xspace}
+\newcommand{\q}{\mbox{${\bf q}$}\xspace}
+
+%% MISC MATH SYMBOLS
+
+\renewcommand{\l}{\ell}
+\newcommand{\un}{\cup}
+\newcommand{\union}{\bigcup}
+\newcommand{\htp}[3]{\{#1\}\,#2\,\{#3\}}
+\newcommand{\htptc}[3]{\langle#1\rangle\,#2\,\langle#3\rangle}
+\newcommand{\la}{\langle}
+\newcommand{\ra}{\rangle}
+\newcommand{\var}{\mbox{$\varphi$}\xspace}
+\newcommand{\cat}{\bullet}
+
+ 
+
+\newcommand \orange[1]{{\color{orange}{#1}}}
+
+\newcommand\demo[1]{
+  \begin{flushright}
+\orange{    \framebox{\textsc{demo: }#1}}
+  \end{flushright}
+}
+
+\hypersetup{colorlinks=true,urlcolor=blue}
+
+\AtBeginSection[]{
+  \frame<handout:0>{
+    \tableofcontents[current,currentsection]
+  }
+}
+
+\color{darkblue}\bf
+
+%% PROGRAMMING LANGUAGE SYNTAX
+\newcommand{\IF}{{\color{darkblue}\bf if}\xspace}
+\newcommand{\THEN}{{\color{darkblue}\bf then}\xspace}
+\newcommand{\ELSE}{{\color{darkblue}\bf else}\xspace}
+\newcommand{\ENDIF}{{\color{darkblue}\bf endif}\xspace}
+\newcommand{\WHILE}{{\color{darkblue}\bf while}\xspace}
+\newcommand{\DO}{{\color{darkblue}\bf do}\xspace}
+\newcommand{\ENDWHILE}{{\color{darkblue}\bf endwhile}\xspace}
+\newcommand{\BEGIN}{{\color{darkblue}\bf begin}\xspace}
+\newcommand{\END}{{\color{darkblue}\bf end}\xspace}
+\newcommand{\PROC}{{\color{darkblue}\bf procedure}\xspace}
+\newcommand{\CALL}{{\color{darkblue}\bf call}\xspace}
+\newcommand{\VAL}{{\color{darkblue}\bf value}\xspace}
+\newcommand{\VALRES}{{\color{darkblue}\bf value-result}\xspace}
+\newcommand{\RES}{{\color{darkblue}\bf result}\xspace}
+
+
+%%%% General %%%%
+\renewcommand{\ss}{\smallskip}
+\newcommand{\Eg}{E.g.,\xspace}
+\newcommand{\eg}{e.g.,\xspace}
+\newcommand{\ie}{i.e.,\xspace}
+
+
+\newcommand{\codetext}[1]{\texttt{#1}\xspace}
+\newcommand{\optext}[1]{\texttt{#1}}
+
+
+%%% DATA SETS
+\newcommand{\Cl}{\codetext{Class}\xspace}
+\newcommand{\Cn}{\codetext{CourseName}\xspace}
+\newcommand{\Cr}{\codetext{Course}\xspace}
+\newcommand{\En}{\codetext{Entries}\xspace}
+\newcommand{\Gd}{\codetext{Grade}\xspace}
+\newcommand{\Id}{\codetext{IdNum}\xspace}
+\newcommand{\Mj}{\codetext{Major}\xspace}
+\newcommand{\Nm}{\codetext{Name}\xspace}
+\newcommand{\St}{\codetext{Student}\xspace}
+\newcommand{\Sm}{\codetext{Semester}\xspace}
+\newcommand{\Tn}{\codetext{Transcript}\xspace}
+
+
+\newcommand{\actid}[1]{\ensuremath{\mathsf{#1}}\xspace}
+\newcommand{\cd}[1]{\codetext{#1}}
+\newcommand{\ct}[1]{\textsc{#1}}
+
+
+\newcommand{\emp}[1]{\textbf{#1}}
+\newcommand{\empp}[1]{\emph{#1}}
+\newcommand{\empb}[1]{\textbf{#1}}
+\newcommand{\empi}[1]{\textit{#1}}
+\newcommand{\empbi}[1]{\textbf{\textit{#1}}}
+
+\newcommand{\satt}{\equiv}
+\newcommand{\sat}{\models}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%% Key Emphasized Terms ``Michael Jackson style''
+
+\newcommand{\fundterm}[1]{\textsc{#1}\xspace}
+\newcommand{\plural}[1]{{#1}\fundterm{s}}
+
+\newcommand{\actions}{\fundterm{actions}}
+\newcommand{\act}{\fundterm{action}}
+\newcommand{\acts}{\fundterm{actions}}
+\newcommand{\app}{\fundterm{application}}
+\newcommand{\appdom}{\fundterm{application domain}}
+\newcommand{\appsoft}{\fundterm{application software}}
+\newcommand{\aut}{\fundterm{automaton}}
+\newcommand{\auts}{\fundterm{automata}}
+\newcommand{\Buchi}{\fundterm{Buchi automaton}}
+\newcommand{\Buchis}{\fundterm{Buchi automata}}
+\newcommand{\comp}{\fundterm{computation}}
+\newcommand{\comps}{\plural{\comp}}
+\newcommand{\checks}{\fundterm{checks}}
+\newcommand{\checksclause}{\fundterm{checks clause}}
+\newcommand{\datmod}{\fundterm{data model}}
+\newcommand{\datmods}{\plural{\datmod}}
+\newcommand{\decomposed}{\fundterm{decomposed}}
+\newcommand{\defnn}{\fundterm{definition}}
+\newcommand{\defnns}{\plural{\defnn}}
+\newcommand{\desc}{\fundterm{description}}
+\newcommand{\descs}{\fundterm{descriptions}}
+\newcommand{\desig}{\fundterm{designation}}
+\newcommand{\desigs}{\plural{\desig}}
+\newcommand{\design}{\fundterm{design}}
+\newcommand{\effects}{\fundterm{effects}}
+\newcommand{\effectsclause}{\fundterm{effects clause}}
+\newcommand{\event}{\fundterm{event}}
+\newcommand{\events}{\fundterm{events}}
+\newcommand{\globc}{\fundterm{global constraint}}
+\newcommand{\globcs}{\fundterm{global constraints}}
+\newcommand{\helps}{\fundterm{helps}}
+\newcommand{\impl}{\fundterm{implementation sketch}}
+\newcommand{\interface}{\fundterm{interface}}
+\newcommand{\interfaces}{\fundterm{interfaces}}
+\newcommand{\mach}{\fundterm{machine}}
+\newcommand{\machine}{\fundterm{machine}}
+\newcommand{\model}{\fundterm{model}}
+\newcommand{\module}{\fundterm{module}}
+\newcommand{\modules}{\fundterm{modules}}
+\newcommand{\modint}{\fundterm{module interface}}
+\newcommand{\modints}{\fundterm{module interfaces}}
+\newcommand{\modifies}{\fundterm{modifies}}
+\newcommand{\modspec}{\fundterm{module specification}}
+\newcommand{\modspecs}{\fundterm{module specifications}}
+\newcommand{\overview}{\fundterm{overview}}
+\newcommand{\precond}{\fundterm{precondition}}
+\newcommand{\postcond}{\fundterm{postcondition}}
+\newcommand{\probcntxt}{\fundterm{problem context}}
+\newcommand{\program}{\fundterm{program}}
+\newcommand{\programs}{\fundterm{programs}}
+\newcommand{\reqs}{\fundterm{requirements}}
+\newcommand{\requires}{\fundterm{requires}}
+\newcommand{\requiresclause}{\fundterm{requires clause}}
+\newcommand{\requirements}{\fundterm{requirements}}
+\newcommand{\spec}{\fundterm{specification}}
+\newcommand{\scopes}{\fundterm{scopes}}
+\newcommand{\state}{\fundterm{state}}
+\newcommand{\states}{\plural{\state}}
+\newcommand{\stspc}{\fundterm{state space}}
+
+%%%%%%%%%%%%%%%%%%%%%%% GENERAL MATH SYMBOLS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\Adj}{\mathop{\rm Adj}\nolimits}
+\newcommand{\abs}[1]{\left| #1\right|}
+\newcommand{\card}[1]{\left| #1\right|}
+\newcommand{\ar}{\rightarrow}  
+%\newcommand{\ar}{\longrightarrow}
+\newcommand{\al}{\alpha}
+\renewcommand{\b}[1]{\overline{#1}}
+\newcommand{\choice}{\mbox{$[\hspace*{-1.0pt}]$}}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\renewcommand{\d}{\, . \,}      % separator in quantified formulae
+\newcommand{\df}{\triangleq}
+%\newcommand{\df}{\mbox{$\:\stackrel{\rm df}{=\!\!=}\:$}}
+\newcommand{\dn}{\mbox{$\hspace{-0.1em}\downarrow\hspace{-0.1em}$}}
+\newcommand{\Ex}{\mathop{\rm Ex}}
+\newcommand{\es}{``"}   %empty string
+\newcommand{\expect}[1]{{\rm E}\left[ #1 \right]}
+\newcommand{\expectsq}[1]{{\rm E}^2\left[ #1 \right]}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\renewcommand{\ge}{\geqslant}
+\newcommand{\given}{\mid}
+\newcommand{\halfind}{\hspace*{1.5em}}
+\newcommand{\ifof}{\Longleftrightarrow} % logical equivalence
+\newcommand{\img}{\mathrm{Image}}
+\newcommand{\ints}{\cap}
+\renewcommand{\l}{\ell}
+\renewcommand{\le}{\leqslant}
+\newcommand{\lra}{\mbox{$\longrightarrow$}}
+%\newcommand{\mod}{\ \mathrm{mod}\ }
+\newcommand{\oneton}{\{1,\,\ldots, n\}}
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\prob}[1]{\Pr\left\{ #1 \right\}}
+\newcommand{\pind}{\hspace*{3.0em}}
+\newcommand{\pj}{\!\upharpoonright\!}
+\newcommand{\proj}{\pj}
+\newcommand{\preimg}{\mathrm{PreImage}}
+\newcommand{\pl}{\!\parallel\!}
+\newcommand{\s}{\mbox{$\hspace{-1pt}-\hspace{-2pt}$}}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+%\newcommand{\set}[1]{\{#1\}}
+\newcommand{\seq}{\approx}
+\newcommand{\spc}{\mbox{\vspace{-0.25in}}}
+\newcommand{\sct}{\ensuremath{\ |\ }}
+\newcommand{\st}[2]{\mbox{$\stackrel{#1}{#2}$}} % abbreviated stackrel}
+%\newcommand{\st}{\ | \ }
+\newcommand{\sub}{\subseteq}
+\newcommand{\twodots}{\mathinner{\ldotp\ldotp}}
+\newcommand{\tiff}{\textup{\ iff\ }}
+\newcommand{\tl}[1]{\mbox{$\tilde{#1}$}}% abbreviated tilde
+\newcommand{\tpl}[1]{\ensuremath{\langle #1 \rangle}}
+\newcommand{\up}{\mbox{$\hspace{-0.1em}\uparrow\hspace{-0.1em}$}}
+\newcommand{\Var}{\mathop{\rm Var}\nolimits}
+\newcommand{\variance}[1]{{\rm Var}\left[ #1 \right]}
+\newcommand{\w}{\omega}                
+
+
+%%%%%%%%%%%%%%%%%%% Ints, Reals, etc %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\reals}{{\mathbb R}}
+\newcommand{\integers}{{\mathbb Z}}
+\newcommand{\naturals}{{\mathbb N}}
+\newcommand{\nat}{\naturals}
+\newcommand{\nats}{\naturals}
+\newcommand{\rationals}{{\mathbb Q}}
+\newcommand{\complex}{{\mathbb C}}
+\newcommand{\complexes}{{\mathbb C}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%% MATH MACROS AND ENVIRONMENTS %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcommand{\se}[3]{\ensuremath{#1[#2 .. #3]}}
+\newcommand{\se}[3]{\ensuremath{#1[#2 \! : \! #3]}}
+%\newcommand{\se}[3]{\ensuremath{#1[#2,\ldots,#3]}}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% START IntSet EXAMPLE %%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\els}{\ensuremath{els}\xspace}
+\newcommand{\elsa}{\ensuremath{els}}
+\newcommand{\gI}{\codetext{getIndex}\xspace}
+\newcommand{\insrt}{\codetext{insert}}
+\newcommand{\isIn}{\codetext{isIn}}
+\newcommand{\IntSet}{\codetext{IntSet}}
+\newcommand{\IntSetNoDup}{\codetext{IntSetNoDup}\xspace}
+\newcommand{\IntSetNoDupSort}{\codetext{IntSetNoDupSort}\xspace}
+\newcommand{\IntSetSort}{\codetext{IntSetSort}\xspace}
+\newcommand{\remov}{\codetext{remove}}
+\newcommand{\ISunion}{\codetext{union}} %% union --> ISunion
+\newcommand{\sze}{\codetext{size}\xspace}
+\renewcommand{\top}{\ensuremath{top}\xspace}
+
+%%%%%%%%%%%%%%%%% IntSet iterator
+\newcommand{\elements}{\codetext{elements}\xspace}
+\newcommand{\IntGenerator}{\codetext{IntGenerator}}
+
+%%%%%%%%%%%%%%%%% END IntSet EXAMPLE %%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Misc Abbrevs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcommand{\spec}{\textsf}     % use for problem specification
+
+\newcommand{\AF}{\mathrm{AF}}
+\newcommand{\repok}{\texttt{repOk}\xspace}
+\newcommand{\intset}{\mathrm{set}}
+\newcommand{\aop}{\mathtt{abstract\!-\!op}}
+\newcommand{\cop}{\mathtt{concrete\!-\!op}}
+
+\newcommand{\inv}{\ensuremath{\!\sim\!}}
+
+
+%%%%%%%%%%%%%%%%%% JAVA keywords in teletype code style
+\newcommand{\Iterator}{\codetext{Iterator}}
+\newcommand{\generator}{\codetext{generator}\xspace}
+\newcommand{\hasNext}{\codetext{hasNext}\xspace}
+\newcommand{\java}{\codetext{java}}
+\newcommand{\util}{\codetext{util}}
+\newcommand{\Object}{\codetext{Object}\xspace}
+\newcommand{\Integer}{\codetext{Integer}\xspace}
+\newcommand{\intValue}{\codetext{intValue}\xspace}
+
+
+
+
+
+
+
+
+
+
+
+

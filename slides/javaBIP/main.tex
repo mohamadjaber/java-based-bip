@@ -1,0 +1,446 @@
+\documentclass[compress,xcolor=dvipsnames,10pt]{beamer}
+\input{theme}
+\input{packages}
+\input{macros}
+
+
+\begin{document}
+%%%%%%%%%%%%%%
+\graphicspath{{figs/}}
+\input{title}
+%%%%%%%%%%%%%%
+
+
+
+\begin{frame}[fragile]
+\frametitle{Base Components (Behaviors)}
+\begin{columns}
+ \begin{column}{0.4\linewidth}
+ \begin{center}
+ \includegraphics[scale=0.5]{figs/basecomponent.pdf}
+\end{center}
+  \end{column}
+   \begin{column}{0.55\linewidth}
+   \begin{lstlisting}[style=customjava, basicstyle=\ttfamily\tiny]
+public class ExampleComp extends BaseComponent {
+  private WrapInt x = new WrapInt();
+  private WrapInt y = new WrapInt();
+  
+  // Locations
+  private Location l0 = new Location();
+  private Location l1 = new Location();
+  private Location l2 = new Location();
+   
+  // Ports
+  public SendPort p1 = new SendPort(x, y);
+  public SendPort p2 = new SendPort(y);
+  public ExampleComp(Compound compound) {
+    super(compound);
+    setInitial(l0);
+    
+    addTransition( new Transition(l0, l1, p1) {
+      public boolean guard()  { return x.value > 0; }
+      public void action()    { x.value++; }
+    });
+     
+    addTransition( new Transition(l0, l2, p2) {
+      public boolean guard()  { return y.value < 0; }
+      public void action()    { y.value += x.value; }
+    });
+  }
+}
+\end{lstlisting}
+  \end{column}
+ \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Synchronization Components (Conversations)}
+\begin{columns}
+ \begin{column}{0.45\linewidth}
+  \begin{center}
+ \includegraphics[scale=0.5]{figs/synccomponent.pdf}
+\end{center}
+  \end{column}
+   \begin{column}{0.55\linewidth}
+   \begin{lstlisting}[style=customjava, basicstyle=\ttfamily\tiny]
+public class ExampleSync extends SyncComponent {
+  private WrapInt x = new WrapInt();
+  private WrapInt y = new WrapInt();
+  
+  // Locations
+  private Location l0 = new Location();
+  private Location l1 = new Location();
+   
+  // Ports
+  public SendPort s = new SendPort(x);
+  
+  public ReceivePort p = new ReceivePort();
+  public ReceivePort q = new ReceivePort();
+  public ReceivePort r = new ReceivePort();
+
+  public ExampleSync(Compound compound) {
+    super(compound);
+    setInitial(l0);
+    
+    addTransition( new Transition(l0, l1, s, p, q, r) {
+      public boolean guard()  { 
+        return ((WrapInt)p.getVariable(0)).value 
+            <= ((WrapInt) q.getVariable(0)).value;
+      }
+      public void up() { 
+        x.value = ((WrapInt) p.getVariable(0)).value; 
+      }
+      public void dn() { 
+        ((WrapInt) q.getVariable(1)).value = x + y; 
+      }
+    });
+  }
+}
+\end{lstlisting}
+  \end{column}
+ \end{columns}
+\end{frame}
+
+\begin{frame}
+ \frametitle{Behaviors and Conversations}
+ \begin{center}
+  \includegraphics[scale=0.45]{figs/javabip.pdf}
+ \end{center}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+ \frametitle{Implementation}
+ \begin{itemize}
+  \item Thread per base component.
+  \item Thread for the conversation layer.
+ \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+ \frametitle{Implementation - Base Component}
+
+       \begin{lstlisting}[style=customjava, basicstyle=\ttfamily\tiny]
+public void run() {
+  while(true) {
+    try {
+      notifyConversationLayer();
+      semaphore.acquire();
+    }
+    catch (InterruptedException e) {
+       return; // An interrupt has been sent from the conversation, in case of global deadlock. 
+    }
+    performTransition();
+  }
+}
+\end{lstlisting}
+\begin{enumerate}
+\item Notify the conversation layer, that is:
+\begin{enumerate}
+\item Check the guard of the outgoing transitions 
+\item Notify the corresponding receive ports accordingly
+\begin{enumerate}
+ \item Mark each receive port (of a specific sync component) as been notified
+ \item Check if there exist a transition where all its receive ports have been notified and its guard is \texttt{true}
+ \item Execute the \texttt{up()} method and keep track of the selected transition
+ \item If that transition has a send port, then notify the corresponding receive ports, and so on
+\end{enumerate}
+\item Increment the value of the conversation layer semaphore
+\end{enumerate}
+\item Wait for the conversation layer (if an interrupt has been received return) 
+\item On resume, execute the corresponding action of the transition and move to the next location
+\end{enumerate}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+ \frametitle{Implementation - Conversation Layer}
+
+       \begin{lstlisting}[style=customjava, basicstyle=\ttfamily\tiny]
+public void run() {
+  while(true) {
+    waitComponents();
+    compute();
+    if(!thread.isInterrupted())
+      notifyComponents();
+    else {
+      System.out.println("***** deadlock ******");
+      return;
+    }
+  }
+}
+\end{lstlisting}
+\begin{enumerate}
+\item Wait for all the base components
+\item Compute, that is
+\begin{enumerate}
+\item Select a radom sync component which is ready and in the top (i.e., the selected transition has no send port)
+\item If such component does exist:
+\begin{enumerate}
+ \item Execute the down action of the selected sync component and change its location
+\item Recursively execute the down action of the bottom sync components and move the locations accordingly. 
+\item If the bottom component is a base component store its corresponding send port   
+\end{enumerate}
+\item otherwise, global deadlock detection, send an interrupt to the base components and myself 
+\end{enumerate}
+\item If not interrupted, notify the base components (i.e., release their semaphores set their port to be executed), otherwise return 
+\end{enumerate}
+
+\end{frame}
+
+
+\begin{frame}
+ \frametitle{Example: Network Sorting Algorithm (version 1)}
+ \begin{center}
+  \includegraphics[scale=0.45]{figs/nsa1v1.pdf}
+ \end{center}
+
+\end{frame}
+
+
+\begin{frame}
+ \frametitle{Example: Network Sorting Algorithm (version 1)}
+ \begin{center}
+  \includegraphics[scale=0.45]{figs/nsa2v1.pdf}
+ \end{center}
+ \end{frame}
+ 
+ \begin{frame}
+ \frametitle{Example: Network Sorting Algorithm (version 2)}
+ \begin{center}
+  \includegraphics[scale=0.45]{figs/nsa1v2.pdf}
+ \end{center}
+\end{frame}
+
+
+\begin{frame}
+ \frametitle{Example: Network Sorting Algorithm (version 2)}
+ \begin{center}
+  \includegraphics[scale=0.45]{figs/nsa2v2.pdf}
+ \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+ \frametitle{Example: Network Sorting Algorithm (version 2)}
+        \begin{lstlisting}[style=customjava, basicstyle=\ttfamily\tiny]
+// Base Components
+ArrayAtom comp1 = new ArrayAtom(this, 10);
+ArrayAtom comp2 = new ArrayAtom(this, 10);
+ArrayAtom comp3 = new ArrayAtom(this, 10);
+ArrayAtom comp4 = new ArrayAtom(this, 10);
+ArrayAtom comp5 = new ArrayAtom(this, 10);
+ArrayAtom comp6 = new ArrayAtom(this, 10);
+ArrayAtom comp7 = new ArrayAtom(this, 10);
+ArrayAtom comp8 = new ArrayAtom(this, 10);
+
+// Sync Components
+ExchangeFinish sync1 = new ExchangeFinish(this);
+ExchangeFinish sync2 = new ExchangeFinish(this);
+ExchangeFinish sync3 = new ExchangeFinish(this);
+ExchangeFinish sync4 = new ExchangeFinish(this);
+ExchangeFinish sync5 = new ExchangeFinish(this);
+ExchangeFinish sync6 = new ExchangeFinish(this);
+
+Exchange top = new Exchange(this);
+
+// Connections
+sync1.p1.connect(comp1.work);
+sync1.p2.connect(comp2.work);
+sync2.p1.connect(comp3.work);
+sync2.p2.connect(comp4.work);
+sync3.p1.connect(comp5.work);
+sync3.p2.connect(comp6.work);
+sync4.p1.connect(comp7.work);
+sync4.p2.connect(comp8.work);
+
+sync5.p1.connect(sync1.work);
+sync5.p2.connect(sync2.work);
+sync6.p1.connect(sync3.work);
+sync6.p2.connect(sync4.work);
+
+top.p1.connect(sync5.work);
+top.p2.connect(sync6.work);
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Restrictions - No Cycle}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\begin{center}
+\includegraphics[scale=0.35]{restrictionNoCycle.pdf}
+\end{center}
+\end{column}
+\begin{column}{0.6\textwidth}
+Note that, the static connections may contain a cycle but at runtime this cycle is not reachable. 
+\begin{block}{TODO}
+For safety, avoid connections that may lead to a cycle. That is, check if the static connections contain a deadlock, if so, throw an exception.  
+\end{block}
+\end{column}
+\end{columns}
+
+\end{frame}
+
+
+
+\begin{frame}
+\frametitle{Restrictions - Deterministic Sync Components}
+
+\begin{center}
+\includegraphics[scale=0.35]{deterministicSync.pdf}
+\end{center}
+
+\begin{itemize}
+\item We assume that sync component are deterministic. That is, from the current location, at maximum one of the outgoing transition could be ready.
+\item If not, we need to propagate up different value for each variable which is not to obvious. 
+\item Under this assumption, upon find a ready transition (all ports received, it guard is true), we can directly notify the corresponding receive ports. 
+\item If the propagation will not lead to an enable top sync component, it will not be a problem because of the assumption we have. 
+\item In the worst case, we can assume that the behavior of the sync component with no choice, or with choice but with mutually exclusive guards.  
+\end{itemize}
+ 
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Restrictions - Conflict Intersection}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\begin{center}
+\includegraphics[scale=0.35]{restrictionIntersection.pdf}
+\end{center}
+\end{column}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item The figures on the left may lead to a semantic violation. We can avoid such situation statically, as for the cycles. It will be too restrictive, because if the sync component on the top notifies only of is receive ports, in this case, it should be OK. 
+\item Note that, sync components do not suffer from this problem, this is because we assume that are deterministic (see restriction above). 
+\end{itemize}
+
+\begin{block}{TODO}
+However, at runtime, we should check if a component receives two different notifications within an execution cycle [\textcolor{green}{DONE}]. 
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Conversation Layer - Possible Improvements}
+\begin{block}{Choice 1}
+\begin{itemize}
+\item Conversation layer do not need to wait all the base components. 
+\item After a base component does the up notifications, it checks if it it reaches a top sync component and ready. 
+\item In that case, it can notify the conversation layer. 
+\item While the conversation layer is propagating down, it disables all the corresponding sync components that are connected to those selected. 
+\item That is, we do not need to notify all the base components as in the current implementation. 
+\begin{itemize}
+\item Some of the base components will be notified to execute some port
+\item others will be notified by null in order to reset. This is because while propagating down we have disabled some of the sync components. 
+\item The rest will still be waiting.  
+\end{itemize}
+\item Following this scenario may improve the performance drastically. 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{Conversation Layer - Possible Improvements}
+\begin{block}{Choice 2}
+\begin{itemize}
+\item Partition sync component into groups. 
+\item Create one thread per group. 
+\item This may lead to some conflicts. 
+\end{itemize}
+\end{block}
+\end{frame}
+
+\newcommand{\goesto}[1][]{\stackrel{#1}{\longrightarrow}} % -->
+\newcommand{\ngoesto}[1][]{\stackrel{#1}{\not\longrightarrow}} % -->
+\newcommand{\arrow}[2]  {\xrightarrow[{\scriptsize #2}]{{\scriptsize #1}}}
+
+\begin{comment}
+\begin{frame}
+\frametitle{Semantic Trash}
+$$
+\frac
+{l \arrow{a/S}{} l' \quad q_1 \arrow{p_1}{X_1} a'_1 \quad q_2 \arrow{p_2}{X_2} a'_2 \quad a = p_1 p_2
+}
+{(l,q_1,q_2) \arrow{a/S}{X_1 \cup X_2 \cup S} (l', q'_1, q'_2)}
+$$
+$$
+\cup_S \arrow{a}{}_S
+$$
+$$ Top
+\frac
+{\arrow{a/-}{}}
+{(l,q_1,q_2) \arrow{a}{}_S (l', q'_1, q'_2)}
+$$
+
+$X$ set of components
+
+$S$ a sync component
+
+$$
+(q_{\bar{X}}, q_X) \arrow{a}{}(q_{\bar{X}}, q'_X)
+$$
+
+$$
+ q_X \arrow{a/-}{X} q'_X
+$$
+\end{frame}
+\end{comment}
+
+\begin{frame}
+ \frametitle{Non-Deterministic Sync Components}
+ \begin{itemize}
+  \item Lower component: update function
+
+\begin{itemize}
+ \item Replace \texttt{value} of the wrappers by \texttt{value()} with a \texttt{private int index}
+\item For each outgoing transition we assign an index
+\item \texttt{value} will create a copy of the variable if it is not already create for the given index. 
+\item The wrapper will eventually contains different copies of it. 
+\item We set the \texttt{index}, then we call the update function. 
+\item The \texttt{value()} method returns the value of the copy at the \texttt{index}
+\end{itemize}
+\end{itemize}
+
+\end{frame}
+\begin{frame}
+ \frametitle{Non-Deterministic Sync Components}
+ \begin{itemize}
+  \item Upper component: guard
+\begin{itemize}
+ \item When receiving a notification that a port is ready on a specific transition. In practice we are receiving this port with some values.
+ \item It is possible that, because of non-deterministic of the lower layer, we will receive a notification from the same port but with different values. 
+ \item When all the received ports are notified of a transition, for all possible combinations (indices) of the available values, we evaluate the guard.
+ \item If two variables belongs to the same component they should be assigned to the same index. 
+ \item Upon receiving another notification (new values), we evaluate the received values with the existing ones. 
+ \item For each variable copy we have the index of the transition and an index of the lower layer. Different solutions: 
+ \begin{enumerate}
+  \item N transitions $\implies$ N copies per variable. Upper M transitions $\implies$ N $\times$ M copies per variable [bad solution, too many variables], but we need to send only one index. 
+  \item Create a copy only if necessary. Here two options exist (1) send an index per variable copy (2) when create a variable, fill in the other non created variables with their default values (then we can send only one index per send).  
+ \end{enumerate}
+
+\end{itemize}
+ \end{itemize}
+\end{frame}
+\begin{frame}
+ \frametitle{Non-Deterministic Sync Components}
+ {\scriptsize
+ Remark: If the lower component contains two outgoing transitions where both are labeled with send port $p_1$, and the upper component contains also two outgoing transitions both labeled with receive port $p_1$.
+ So, in the worst case, we have to create four copies of the corresponding variables of the upper component (e.g., first upper transition receives $p_1$ of the first lower transition, first upper transition receives $p_1$ of the second lower transition, 
+ Second upper transition receives $p_1$ of the first lower transition, and finally second upper transition receives $p_1$ of the second lower transition). We have to keep track of the selected transition at each layer. 
+ Example:
+ \scriptsize ?p1?p2?p3   !s1: p1 corresponds to a transition in the lower executed with some values (lower of the lower).
+ }
+\end{frame}
+
+\end{document}

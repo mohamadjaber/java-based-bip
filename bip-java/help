@@ -1,0 +1,2 @@
+mvn -Dtest=TestSorting1 clean test
+mvn clean test -- run all tests

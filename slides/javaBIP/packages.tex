@@ -1,0 +1,102 @@
+\usepackage{moreverb}
+\usepackage{verbatim}
+%\usepackage{tikz}
+%\usetikzlibrary{trees}
+\usepackage{multirow}
+\usepackage{xspace}
+
+
+
+%
+
+\newcommand{\ed}[2]{#1 \rightarrow #2}
+\newcommand{\rr}[1]{\textcolor{red}{#1}}
+
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancybox} % for shadow box and others type of boxes
+\usepackage{graphicx} % for includegraphics
+\usepackage{graphicx,color} % color
+\usepackage{moreverb}
+\usepackage{epsfig} % for include epsfig
+\usepackage{subfigure}
+\setbeamercovered{transparent} 
+\usepackage{multirow}
+%\usepackage{bera}
+%\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{gray97}{gray}{.97}
+\definecolor{gray45}{gray}{.45}
+\definecolor{gray75}{gray}{.75}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{blueb}{rgb}{0,0,1}
+\definecolor{redb}{rgb}{0.5,0,0}
+\definecolor{darkblue}{rgb}{0.0,0.0,0.6}
+\definecolor{cyan}{rgb}{0.0,0.6,0.6}
+
+\usepackage{listings}
+
+
+%Style Console
+\lstdefinestyle{console}
+{basicstyle=\scriptsize\bf\ttfamily
+}
+
+\lstdefinestyle{Bash}
+{language=bash,
+keywordstyle=\color{blue},
+basicstyle=\ttfamily\scriptsize,
+morekeywords={gcc, g++, jaber@jaber,cat,mkdir, ln, ls, grep, wc,cd, killall, top, vi, vim, tail, sudo, apt-get,pstree,make},
+morekeywords=[2]{jaber@jaber:},
+mathescape=false,
+keywordstyle=[2]{\color{red}},
+literate={\$}{{\textcolor{red}{\$}}}1 
+         {:}{{\textcolor{red}{:}}}1
+         {~}{{\textcolor{red}{\textasciitilde}}}1,
+}
+
+\lstdefinestyle{customc}
+{language=C,
+keywordstyle=\color{blue},
+basicstyle=\ttfamily\scriptsize,
+morekeywords={then, endif, endwhile, begin, end},
+morekeywords=[2]{jaber@jaber:},
+mathescape=false,
+keywordstyle=[2]{\color{red}}
+}
+
+
+\lstdefinestyle{customjava}
+{language=java,
+keywordstyle=\color{blue},
+basicstyle=\ttfamily\scriptsize,
+morekeywords={String},
+mathescape=true,
+escapeinside={/*@}{@*/},
+commentstyle=\color{dkgreen},   % comment style
+keywordstyle=[2]{\color{red}}
+}
+
+
+\lstset{ %
+style=customc,                % choose the language of the code
+basicstyle=\tiny,       % the size of the fonts that are used for the code
+numberstyle=\tiny,      % the size of the fonts that are used for the line-numbers
+frame=Ltb,
+rulesep=.4pt,
+mathescape, % Allows escaping to (La)TeX mode within $$,
+stringstyle=\color{redb},
+showstringspaces = false,
+basicstyle=\scriptsize\ttfamily,
+keywordstyle=\color{darkblue}\bf,
+ commentstyle=\color{dkgreen},   % comment style
+%
+breaklines=true
+}
+
