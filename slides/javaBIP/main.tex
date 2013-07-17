@@ -442,4 +442,20 @@ $$
  }
 \end{frame}
 
+\begin{frame}
+ \frametitle{Non-Deterministic Sync Components}
+ \begin{enumerate}
+ \item A transition is assigned to receive ports (e.g. $?p_1 \, ?p_2 \, ?p_3$).
+  \item Each receive port is assigned to variables, where each variable has N copies. 
+  \item When receiving all the receive ports of a given transition $t_i$, we execute its up action. 
+  \item All the modifications of the variables should be done through the call of \texttt{value} method. 
+  \item Calling \texttt{x.value()} method creates a copy the variable \texttt{x} at the current index. 
+  \item The current index depends on the current transition and an index from the lower layer (an index from lower layers mimics the corresponding values of its variables). 
+  \item If for a given current index we call \texttt{y.value()} such that for previouses current indices we do not create a copy of that variable, then we should fill them with the value of its original variable. 
+ \item So that when a transition is enabled we notify the corresponding send port with a given index. 
+ \end{enumerate}
+
+\end{frame}
+
+
 \end{document}
