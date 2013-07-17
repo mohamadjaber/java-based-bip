@@ -1,6 +1,7 @@
 package ujf.verimag.bip.java.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,35 @@ public class SendPort  {
 	public void setSynced() {
 		for(ReceivePort rcvPort: receivePorts) {
 			rcvPort.setSynced();
+		}
+	}
+	
+	
+	/**
+	 * 
+	 */
+	public void conflictReset() {
+		if(component instanceof BaseComponent) {
+			BaseComponent baseComponent = (BaseComponent) component; 
+			for(AbstractTransition t : baseComponent.getCurrentLocation().getOutgoingTransition()) {
+				if(!t.getSendPort().equals(this)) {
+					t.getSendPort().reset();
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * 
+	 */
+	private void reset() {
+		for(ReceivePort receivePort: receivePorts) {
+			TransitionSyncComponent transition = receivePort.getSyncComponent().getCurrentTransition();
+			if(transition != null && Arrays.asList(transition.getReceivePorts()).contains(receivePort)) {
+				receivePort.getSyncComponent().reset();
+				transition.getSendPort().reset();
+			}
 		}
 	}
 	

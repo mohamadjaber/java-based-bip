@@ -1,104 +1,116 @@
 % *********************************************************************
 % *********************************************************************
 
-\section{Externalised Approach}
-\label{sec:external}
+\section{Formal Model}
+\label{sec:formal}
 
 % *********************************************************************
 
-\subsection{Request-Grant Labelled Transition Systems}
-\label{sec:external:model}
+\subsection{Grant-Request Labelled Transition Systems}
+\label{sec:model}
 
-\begin{definition}[RG-LTS and interactions]
+Intuitively, we consider systems built from a number of components, each
+modelled by a labelled transition system (LTS).  In order to perform a
+transition, a basic component, which we call {\em behaviour}, issues a
+number of requests, which are defined by the transition label and can be
+granted by higher-level components, which we call {\em conversations}.
+Thus, in general, a complete transition label consists of two sets of {\em
+  ports}, representing requests the transition must grant and those it must
+obtain in order to be executed.  Below we present a formal model specifying
+such behaviour as well as the implied composition operator.
+
+\begin{definition}[\compmodel{} and interactions]
 \label{defn:lts}
-A \emph{Request-Grant Labelled Transition System} (RG-LTS) is a quadruple
-$(Q,\pin,\pout,\goesto[])$, where $Q$ is a finite set of states, $\pin \cap
-\pout = \emptyset$ are finite sets of respectively {\em grant} and {\em
-  request} ports and $\goesto[] \subseteq Q \times 2^P \times Q$ (with $P =
-\pin \cup \pout$) is a transition relation.  Transitions are labelled by
-\emph{interactions} $\emptyset \neq a \subseteq P$.  We define $q
-\goesto[a] q' \bydef{=}\Big((q, a, q') \in \goesto[]\Big)$ and $q
-\goesto[a]\, \bydef{=}\Big(\exists q' \in Q: q \goesto[a] q'\Big)$.  
+A \emph{Grant-Request Labelled Transition System} (\compmodel{}) is a
+quadruple $(Q,\pin,\pout,\goesto[])$, where $Q$ is a finite set of states,
+$\pin \cap \pout = \emptyset$ are finite sets of respectively {\em grant}
+and {\em request} ports and $\goesto[] \subseteq Q \times 2^P \times Q$
+(with $P = \pin \cup \pout$) is a transition relation.  Transitions are
+labelled by \emph{interactions} $\emptyset \neq a \subseteq P$.  We define
+$q \goesto[a] q' \bydef{=}\Big((q, a, q') \in \goesto[]\Big)$ and $q
+\goesto[a]\, \bydef{=}\Big(\exists q' \in Q: q \goesto[a] q'\Big)$.
 \end{definition}
 
-\begin{definition}[Behaviour and conversations]
-\label{defn:components}
-An RG-LTS $(Q, \pin, \pout, \goesto)$ is 
-\begin{itemize}
-\item a {\em behaviour} if $\pin  = \emptyset$;
-\item a \emph{conversation} if, for any transition $q \goesto[a] q'$, both
-  $a \cap \pin \neq \emptyset$ and $a \cap \pout \neq \emptyset$.
-\end{itemize}
-\end{definition}
+\begin{notation}
+  \label{ntn:lts}
+  In \defn{lts} and below, we skip the index on $\goesto_i$ since it is
+  always clear from the context.  For a \compmodel{} with the sets of grant
+  and request ports respectively $\grant{X}$ and $\request{X}$ (here, $X$
+  can be $P$, $P_i$, \etc[]) we will always denote $X \bydef{=} \grant{X}
+  \cup \request{X}$.
+\end{notation}
 
-Conversations represent sequences of interactions. They are used to compose
-behaviours.
+\begin{definition}[System]
+  \label{defn:system}
+  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto)}{i \in [1,n]}$ be
+  a finite set of \compmodel{} and denote $\pin \bydef{=} \bigcup_{i=1}^n
+  \pin_i$ and $\pout \bydef{=} \bigcup_{i=1}^n \pout_i$.  $S$ is a {\em
+    system} iff the following two conditions hold:
+  \begin{enumerate}
+  \item the sets of request ports of all the {\em components} are pairwise
+    disjoint, \ie $\forall i \neq j,\ \pout_i \cap \pout_j = \emptyset$;
+  \item any grant port belonging to more than one component is also a
+    request port of some component, \ie $\forall p, \left(\exists i \neq 
+    j: p \in \pin_i \cap \pin_j \implies p \in \pout\right)$.
+  \end{enumerate}
+
+  A system is {\em closed} if $\pin \subseteq \pout$.  Otherwise it is {\em
+    open}.
+\end{definition}
 
 To simplify the presentation, below we postulate that for any $q$, the
 predicate $q \goesto[\emptyset] q$ is true, whenever it appears in the
 premises of an SOS rule.
 
-\begin{definition}
-  \label{defn:independent}
-  A set of RG-LTS $T_i = (Q_i, \pin_i, \pout_i, \goesto)$, for $i \in
-  [1,n]$, is called {\em independent} iff their ports are pairwise
-  disjoint, \ie[,] denoting $P_i \bydef{=} \pin_i \cup \pout_i$, we have
-  $\forall i \neq j,\ P_i \cap P_j = \emptyset$.
-\end{definition}
-
-\begin{definition}[1-composable RG-LTS]
-  \label{defn:composable}
-  Let $T_i = (Q_i, \pin_i, \pout_i, \goesto)$, for $i \in [1,n]$, be a set
-  of RG-LTS.  The set $\setdef{T_i}{i\in[1,n]}$ is {\em 1-composable} if
-  there exists a partition $\{G, R\}$ of $[1,n]$ (that is $G \cup R =
-  [1,n]$ and $G \cap R = \emptyset$), such that both sets
-  $\setdef{T_i}{i\in G}$ and $\setdef{T_i}{i\in R}$ are independent and the
-  following two conditions hold:
-  \begin{enumerate}
-  \item $\displaystyle\bigcup_{i \in G} \pout_i\ \cap\ \bigcup_{j \in R}
-    P_j = \emptyset$,\nb{$P_i$, not $\pout_i$} that is none of the request
-    ports of the RG-LTS in group $G$ belong to any of the RG-LTS in group
-    $R$; and
-  \item $\displaystyle\bigcup_{i \in G} \pin_i\ \cap\ \bigcup_{j \in R}
-    \pin_j = \emptyset$, that is the grant ports of RG-LTS in group $G$
-    that also belong to RG-LTS in group $R$ must necessarily be request
-    ports in the latter.
-  \end{enumerate}
-\end{definition}
-
-\begin{definition}[Composition with one conversation]
+\begin{definition}[Operational semantics of a system]
   \label{defn:composition}
-  Let $T_i = (Q_i, \pin_i, \pout_i, \goesto)$, for $i \in [1,n]$, be a set
-  of RG-LTS with pairwise disjoint sets of ports, and let $C = (Q_0,
-  \pin_0, \pout_0, \goesto)$ be a conversation, such that the set of RG-LTS
-  $\{C\}\cup \setdef{T_i}{i\in [1,n]}$ is 1-composable.  As above, we
-  denote $P_i \bydef{=} \pin_i \cup \pout_i$, for $i \in [0,n]$.  The
-  composition of $T_i$ with $C$ is an RG-LTS given by $C(T_1,\dots,T_n)
+  The operational semantics of a system $S = \Setdef{T_i = (Q_i, \pin_i,
+  \pout_i, \goesto)}{i \in [1,n]}$ is given by a \compmodel{} $\compose[S]
   \bydef{=} (Q, \pin, \pout, \goesto)$, where
   \begin{equation}
     \label{eq:composition:ports}
-    Q = \prod_{i=0}^n Q_i\,,
+    Q = \prod_{i=1}^n Q_i\,,
     \hspace{1cm}
-    \pin = \bigcup_{i=0}^n \pin_i \setminus \bigcup_{i=1}^n \pout_i\,,
+    \pin = \bigcup_{i=1}^n \pin_i \setminus \bigcup_{i=1}^n \pout_i\,,
     \hspace{1cm}
-    \pout = \bigcup_{i=0}^n \pout_i \setminus \pin_0
+    \pout = \bigcup_{i=1}^n \pout_i \setminus \bigcup_{i=1}^n \pin_i 
   \end{equation}
   and $\goesto$ is the minimal transition relation inductively defined by
   the derivation rule
   \begin{equation}
     \label{eq:composition:transitions}
     \renewcommand{\arraystretch}{1.5}
-    \derrule[2]{
-      \forall i \in [0,n],\, (a \cap P_i \neq \emptyset \implies 
+    \derrule[3]{
+      a \subseteq \bigcup_{i=1}^n P_i &
+      \forall i \in [1,n],\, (a \cap P_i \neq \emptyset \implies 
         q_i \longgoesto[a \cap P_i] q_i') &
-      \forall i \in [0,n],\, (a \cap P_i = \emptyset \implies q_i = q_i') 
+      \forall i \in [1,n],\, (a \cap P_i = \emptyset \implies q_i = q_i') 
     }{
-      q_0 q_1 \dots q_n \longgoesto[a \cap P] q_0' q_1' \dots q_n'
+      q_1 \dots q_n \longgoesto[a \cap P] q_1' \dots q_n'
     }\,,
   \end{equation}
-  where, in the conclusion, $P \bydef{=} \pin \cup \pout$, with $\pin$ and
-  $\pout$ defined in \eq{composition:ports}.
+  with $P_i$ and $P$ as in \ntn{lts}.
 \end{definition}
+
+\begin{proposition}
+  \label{prop:associativity}
+  Composition operator $\compose$ in \defn{composition} is associative.
+\end{proposition}
+
+\begin{definition}[Behaviour and conversation]
+  \label{defn:components}
+  A \compmodel{} $(Q, \pin, \pout, \goesto)$ is
+  \begin{itemize}
+  \item a {\em behaviour} if $\pin  = \emptyset$;
+  \item a \emph{conversation} if, for any transition $q \goesto[a] q'$, both
+    $a \cap \pin \neq \emptyset$ and $a \cap \pout \neq \emptyset$.
+  \end{itemize}
+\end{definition}
+
+Conversations represent sequences of interactions. They are used to compose
+behaviours.  Notice that operational semantics of a closed system is a
+behaviour.  Below we will only consider systems, whereof each component is
+either a behaviour or a conversation.
 
 \begin{example}[BIP interaction models]
   \label{ex:bip}
@@ -107,95 +119,65 @@ premises of an SOS rule.
   \bigcup_{i=1}^n \pout_i$ and let $\gamma \subseteq 2^P$ be a BIP
   interaction model \cite{BliSif07-acp-emsoft}.  The conversation $C_\gamma
   = \Big(\{*\}, P, \gamma, \Setdef{* \longgoesto[a\cup\{a\}] *}{a \in
-    \gamma}\Big)$ realises the same coordination as the one imposed by
-  $\gamma$, \ie $C_\gamma(B_1, \dots, B_n) = \gamma(B_1, \dots, B_n)$,
-  where the latter is the composed component obtained by applying the
-  interaction model $\gamma$ to behaviours $B_1, \dots, B_n$ with the
-  operational semantics defined in \cite{BliSif07-acp-emsoft}.
+  \gamma}\Big)$ realises the same coordination as the one imposed by
+  $\gamma$, \ie $C_\gamma(B_1, \dots, B_n) \bydef{=} \compose[\{C_\gamma,
+  B_1, \dots, B_n\}] = \gamma(B_1, \dots, B_n)$, where the latter is the
+  composed component obtained by applying the interaction model $\gamma$ to
+  behaviours $B_1, \dots, B_n$ with the operational semantics defined in
+  \cite{BliSif07-acp-emsoft}.
 \end{example}
-
-\begin{definition}
-  \label{defn:composition:parallel}
-  Let $C_j = (Q_j, \pin_j, \pout_j, \goesto)$, for $j = 1,2$, be two
-  independent conversations.  Their \emph{(true concurrency) parallel
-    composition} is the conversation $C_1 \parallel C_2 \bydef{=} (Q, \pin,
-  \pout, \goesto)$, where $Q = Q_1 \times Q_2$, $\pin = \pin_1 \cup
-  \pin_2$, $\pout = \pout_1 \cup \pout_2$ and $\goesto$ is the minimal
-  transition relation inductively defined by the following three derivation
-  rules, with $a \subseteq P_1 \cup P_2$ ($P_i \bydef{=} \pin_i \cup
-  \pout_i$, for $i=1,2$).
-  \begin{equation}
-    \label{eq:parallel}
-    \derrule{q_1 \longgoesto[a] q_1'}{q_1 q_2 \longgoesto[a] q_1' q_2}\,,
-    \hspace{1cm}
-    \derrule[2]{
-      q_1 \longgoesto[a \cap P_1] q_1' & 
-      q_2 \longgoesto[a \cap P_2] q_2' 
-    }{
-      q_1 q_2 \longgoesto[a] q_1' q_2
-    }\,,
-    \hspace{1cm}
-    \derrule{q_2 \longgoesto[a] q_2'}{q_1 q_2 \longgoesto[a] q_1 q_2'}\,.
-  \end{equation}
-\end{definition}
-
-Clearly, parallel composition of independent conversations is associative.
-Hence, this definition can be straightforwardly extended to an independent
-set of conversations of any finite cardinality.  This also allows an
-extension of the composition operator in \defn{composition} to
-conversations applied in parallel to the same set of behaviours.
-
-\begin{definition}
-  \label{defn:composition:multi}
-  Let $\setdef{T_i}{i \in [1,n]}$ be an independent set of RG-LTS and
-  $\setdef{C_j}{j \in [1,m]}$ an independent set of conversations, such
-  that $\setdef{T_i}{i \in [1,n]} \cup \setdef{C_j}{j \in [1,m]}$ is
-  1-composable.  We define
-  \[
-    (C_1, \dots, C_m)(T_1, \dots, T_n) 
-    \bydef{=} 
-    \Big(\parallel(C_1, \dots, C_m)\Big)(T_1, \dots, T_n)\,.
-  \]
-\end{definition}
-
-Clearly, thus defined composition can be applied hierarchically in a
-straightforward manner.  
-
-Notice that, in the context of \defn{composition:multi}, if all $T_i$ are
-behaviours and every conversation grant port is a behaviour request port,
-$(C_1, \dots, C_m)(T_1, \dots, T_n)$ is a behaviour.
 
 \begin{example}[Network sort]
   \label{ex:network}
   ...
 \end{example}
 
-Composition defined by hierarchical application of the operator in
-\defn{composition:multi} allows simultaneous execution of interactions from
-any number of top-level conversations.  However, mutual exclusion among
-interactions can be ensured by applying a single top-level arbiter
-conversation.  Such arbiter conversation can enforce simple
-non-deterministic mutual exclusion, as in \ex{bip}, or any complex
-scheduling protocol, \eg Round-Robin.
+\begin{definition}[Topologies]
+  The {\em topology} of a system $S$ is a directed graph $\topo{S} =
+  (S, E)$, having the components of the system as vertices and the set
+  of edges $E = \setdef{(T_i,T_j)}{\pout_i \cap \pin_j \neq
+    \emptyset}$.  In other words, there is an edge from $T_i$ to $T_j$
+  if some of the requests of the former can be granted by the latter.
 
-Notice that when, as in \ex{network}, the system is given as a directed
-acyclic graph (DAG), it can be grouped into a hierarchical system in
-different ways.  The following proposition shows that operational semantics
-of such systems does not depend on the grouping.
+  If $\topo{S}$ is a directed acyclic graph (DAG), the $S$ is a {\em
+  flow-system}.  If $\topo{S}$ is disconnected, \ie $E = \emptyset$, the
+  system is {\em independent}.
+\end{definition}
 
-\begin{proposition}
-  ...
-\end{proposition}
+Observe that any non-trivial (\ie non-empty) closed flow-system $S$
+necessarily contains a certain number of behaviours.  Each conversation can
+be assigned a {\em level} defined as the maximal length of a directed path
+in $\topo{S}$ from some behaviour to this conversation.
+
+Composition defined by the operational semantics of systems allows
+simultaneous execution of interactions authorised by any number of
+top-level conversations.  However, mutual exclusion can be ensured by
+applying a single top-level arbiter conversation.  Such arbiter
+conversation can enforce simple non-deterministic mutual exclusion, as in
+\ex{bip}, or any complex scheduling protocol, \eg Round-Robin.
 
 % *********************************************************************
 
-\subsection{Data Transfer}
+\subsection{Data Management and Transfer in Flow-Systems}
 \label{sec:data}
 
-We now extend the definitions of \secn{external:model} to incorporate data.
-For simplicity, we assume that a universal data domain $D$ is given.
+We now extend the definitions of \secn{model} to incorporate data.  To
+avoid dealing with causality cycles, we limit ourselves to flow-systems,
+where causal data dependencies can be unambigously resolved.  Intuitively,
+in each cycle, we propagate the data from behaviours upwards through all
+relevant conversations.  At each component, this data can influence the
+decision as to what transitions are enabled.  Finally, once a global
+interaction has been choosen at the top level, the updated data is
+propagated back to behaviours.  Below, we present this in a formal manner.
 
-
+\begin{definition}[\compmodel{} with data]
+  A {\em \compmodel{} with data} is a tuple $(T, \data[i], \data[l],
+  \data[o], up, down)$, where $T = (Q, \pin, \pout, \goesto)$ is a
+  \compmodel{}, $\data[i]$, $\data[l]$ and $\data[o]$ are respectively the
+  domains of {\em input}, {\em local} and {\em output} data, and $up$ and
+  $down$ are mappings from the transition relation $\goesto$ to
+  functions $(\data[l] \times \data[o])^{\data[i]}$ and $\data$
+\end{definition}
 % *********************************************************************
 
 \subsection{Expressiveness Results}

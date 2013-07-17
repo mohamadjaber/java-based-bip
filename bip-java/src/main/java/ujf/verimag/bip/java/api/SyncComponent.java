@@ -134,7 +134,7 @@ public abstract class SyncComponent extends Component {
 				 */
 				// 
 				if(componentEnablePort.get(component) != null) {
-					System.out.println("DAG detection - Component" + component + " has been notified two times");
+					System.out.println("DAG detection - Component: " + component + " has been notified two times");
 					System.exit(0);
 				}
 				
@@ -152,6 +152,10 @@ public abstract class SyncComponent extends Component {
 	
 	public boolean isTop() {
 		return currentTransition != null && currentTransition.getSendPort() == null; 
+	}
+	
+	public TransitionSyncComponent getCurrentTransition() {
+		return currentTransition; 
 	}
 	
 	

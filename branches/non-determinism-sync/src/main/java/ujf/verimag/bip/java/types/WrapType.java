@@ -3,21 +3,31 @@ package ujf.verimag.bip.java.types;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class WrapType<T> {
+import ujf.verimag.bip.java.api.Component;
+
+public class WrapType<T> { 
 	
-	private T originalValue; 
+	private Component component; 
 	
-	private List<T> copies;
+	/**
+	 * values[0] contains the original value of the variables. 
+	 * The other indices contain other values depending on the up actions of non-deterministic transitions
+	 * and different values received from the bottom component.  
+	 */
+	private List<CopyValue<T>> copyValues;
+		
 	
-	private int currentIndex; 
-	
-	
-	public WrapType(T value) {
-		originalValue = value; 
-		copies = new LinkedList<T>();
-		currentIndex = -1; 
+	public WrapType(Component component, T value) {
+		this(component);
 	}
 	
+	
+	public WrapType(Component component) {
+		copyValues = new LinkedList<CopyValue<T>>();
+		this.component = component; 
+	}
+	
+	/*
 	public void setCurrentIndex(int index) {
 		currentIndex = index; 
 	}
@@ -27,20 +37,8 @@ public abstract class WrapType<T> {
 	}
 	
 	public T getValue() {
-		int lastIndex = copies.size() - 1;
-		while(lastIndex < currentIndex) {
-			
-			lastIndex++;
-		}
-		
-		
-		
-		if(copies.size() == currentIndex - 1)
-			return copies.get(currentIndex);
-		
-		
-		
-		return null;
+		expands();
+		return copies.get(currentIndex);
 	}
 	
 	public void update(int index) {
@@ -52,8 +50,19 @@ public abstract class WrapType<T> {
 		}
 	}
 	
+	
 	public void setValue(T value) {
-		originalValue = value; 
+		expands();
+		copies.set(currentIndex, value); 
+	}
+	
+	private void expands() {
+		int lastIndex = copies.size() - 1;
+		while(lastIndex < currentIndex) {
+			copies.add(originalValue);
+			lastIndex++;
+		}
 	}
 
+*/
 }

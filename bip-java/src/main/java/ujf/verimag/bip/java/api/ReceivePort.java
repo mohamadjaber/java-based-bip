@@ -47,4 +47,8 @@ public class ReceivePort {
 		return synced;
 	}
 	
+	public SyncComponent getSyncComponent() {
+		return component; 
+	}
+	
 }

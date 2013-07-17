@@ -15,6 +15,8 @@ public abstract class Component {
 	
 	protected Location currentLocation; 
 	
+	private int currentIndexValues;
+	
 	public Component(Compound compound) {
 		transitions = new HashSet<AbstractTransition>();
 		locations = new HashSet<Location>();
@@ -69,6 +71,10 @@ public abstract class Component {
 		currentLocation = l; 
 	}
 	
+	
+	public int getCurrentIndexValues() {
+		return currentIndexValues; 
+	}
 	
 	
 	
