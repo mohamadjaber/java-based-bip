@@ -332,7 +332,22 @@ However, at runtime, we should check if a component receives two different notif
 
 \begin{frame}
 \frametitle{Conversation Layer - Possible Improvements}
+Currently we are selecting one top component and the we notify the corresponding base components. 
 \begin{block}{Choice 1}
+\begin{enumerate}
+\item Select a top sync component.
+\item Down propagation to compute the corresponding send ports of base components.
+\item For each base component that contains a selected send port, reset the other send ports for other outgoing transition from the current location.
+\item Recheck if there are others top sync components. If so go to 1, otherwise notify all the send ports of the base components.  
+\end{enumerate}
+\end{block}
+
+Following this scenario may improve the performance drastically [\textcolor{green}{DONE}]. 
+\end{frame}
+
+\begin{frame}
+\frametitle{Conversation Layer - Possible Improvements}
+\begin{block}{Choice 2}
 \begin{itemize}
 \item Conversation layer do not need to wait all the base components. 
 \item After a base component does the up notifications, it checks if it it reaches a top sync component and ready. 
@@ -344,7 +359,7 @@ However, at runtime, we should check if a component receives two different notif
 \item others will be notified by null in order to reset. This is because while propagating down we have disabled some of the sync components. 
 \item The rest will still be waiting.  
 \end{itemize}
-\item Following this scenario may improve the performance drastically. 
+\item Following this scenario may improve the performance drastically. ``This may contradict with the semantic proposed by Simon'' as it allows conflict on the same port.
 \end{itemize}
 \end{block}
 \end{frame}

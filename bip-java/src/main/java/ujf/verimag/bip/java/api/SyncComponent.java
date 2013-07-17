@@ -133,7 +133,10 @@ public abstract class SyncComponent extends Component {
 				 *  otherwise semantic error, a base component receives to execute multiple ports.
 				 */
 				// 
-				if(componentEnablePort.get(component) != null) {
+				if(componentEnablePort.get(component) != null 
+						&& componentEnablePort.get(component)!= sendPort) { // Allows conflict on the same port, following Simon Bliudze Semantics.
+																			// If not remove the second condition of the guard. 
+																			// But data transfer override. 
 					System.out.println("DAG detection - Component: " + component + " has been notified two times");
 					System.exit(0);
 				}
@@ -150,8 +153,18 @@ public abstract class SyncComponent extends Component {
 		return isEnable; 
 	}
 	
+	/*
 	public boolean isTop() {
 		return currentTransition != null && currentTransition.getSendPort() == null; 
+	}
+	*/
+	
+	public boolean isTop() {
+		return currentTransition != null && 
+				(	currentTransition.getSendPort() == null || 
+				
+					currentTransition.getSendPort().getReceivePorts().size() == 0
+				); 
 	}
 	
 	public TransitionSyncComponent getCurrentTransition() {
