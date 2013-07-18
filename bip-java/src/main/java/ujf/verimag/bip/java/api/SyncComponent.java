@@ -88,12 +88,12 @@ public abstract class SyncComponent extends Component {
 	 * because from the assumption we have the other transition could not be enabled. 
 	 */
 	public synchronized void updateSynced() {
+		outerLoop:
 		for(AbstractTransition t: currentLocation.getOutgoingTransition()) {
 			TransitionSyncComponent transition = (TransitionSyncComponent) t; 
-			ReceivePort[] receivePorts = transition.getReceivePorts();
 			
-			for(int i = 0; i < receivePorts.length; i++) 
-				if(!receivePorts[i].getSynced()) return; 
+			for(ReceivePort receivePort: transition.getReceivePorts()) 
+				if(!receivePort.getSynced()) continue outerLoop;
 			
 			if(transition.guard()) {
 				transition.upAction();
@@ -120,10 +120,9 @@ public abstract class SyncComponent extends Component {
 		transition.action();
 		setCurrentLocation(transition.getDestination());
 		
-		ReceivePort[] receivePorts = transition.getReceivePorts();
 		
-		for(int i = 0; i < receivePorts.length; i++) {
-			SendPort sendPort = receivePorts[i].getSendPort();
+		for(ReceivePort receivePort: transition.getReceivePorts()) {
+			SendPort sendPort = receivePort.getSendPort();
 			Component component = sendPort.getComponent();
 			if(component instanceof BaseComponent) {
 				
@@ -153,18 +152,11 @@ public abstract class SyncComponent extends Component {
 		return isEnable; 
 	}
 	
-	/*
-	public boolean isTop() {
-		return currentTransition != null && currentTransition.getSendPort() == null; 
-	}
-	*/
+
 	
 	public boolean isTop() {
 		return currentTransition != null && 
-				(	currentTransition.getSendPort() == null || 
-				
-					currentTransition.getSendPort().getReceivePorts().size() == 0
-				); 
+				(currentTransition.getSendPort() == null || currentTransition.getSendPort().getReceivePorts().size() == 0); 
 	}
 	
 	public TransitionSyncComponent getCurrentTransition() {
