@@ -5,64 +5,54 @@ import java.util.List;
 
 import ujf.verimag.bip.java.api.Component;
 
+/**
+ * 
+ *
+ * @param <T>
+ */
 public class WrapType<T> { 
 	
 	private Component component; 
 	
 	/**
-	 * values[0] contains the original value of the variables. 
-	 * The other indices contain other values depending on the up actions of non-deterministic transitions
+	 * values[0] contains the original value of the variable. 
+	 * The other indices contain other copies depending on the up actions  (non-deterministic transitions)
 	 * and different values received from the bottom component.  
 	 */
-	private List<CopyValue<T>> copyValues;
+	private List<T> copyValues;
 		
 	
 	public WrapType(Component component, T value) {
 		this(component);
+		// original value.
+		copyValues.add(value);
 	}
 	
 	
 	public WrapType(Component component) {
-		copyValues = new LinkedList<CopyValue<T>>();
+		copyValues = new LinkedList<T>();
+		copyValues.add(null);
 		this.component = component; 
 	}
 	
-	/*
-	public void setCurrentIndex(int index) {
-		currentIndex = index; 
-	}
-	
-	public int getCurrentIndex() {
-		return currentIndex; 
+	private void expands() {
+		int lastIndex = copyValues.size() - 1;
+		T originalValue = copyValues.get(0);
+		while(lastIndex < component.getCurrentIndexValues()) {
+			copyValues.add(originalValue);
+			lastIndex++;
+		}
 	}
 	
 	public T getValue() {
 		expands();
-		return copies.get(currentIndex);
-	}
-	
-	public void update(int index) {
-		if(copies.size() > 0) {
-			assert(copies.size() > index && index >=0);
-			originalValue = copies.get(index);
-			copies.clear();
-			currentIndex = -1; 
-		}
+		return copyValues.get(component.getCurrentIndexValues());
 	}
 	
 	
 	public void setValue(T value) {
 		expands();
-		copies.set(currentIndex, value); 
-	}
-	
-	private void expands() {
-		int lastIndex = copies.size() - 1;
-		while(lastIndex < currentIndex) {
-			copies.add(originalValue);
-			lastIndex++;
-		}
+		copyValues.set(component.getCurrentIndexValues(), value); 
 	}
 
-*/
 }

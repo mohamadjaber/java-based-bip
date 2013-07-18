@@ -1,6 +1,8 @@
 package ujf.verimag.bip.java.api;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class Component {
@@ -15,13 +17,15 @@ public abstract class Component {
 	
 	protected Location currentLocation; 
 	
-	private int currentIndexValues;
+	protected List<KeyValues> keysValues;
 	
 	public Component(Compound compound) {
 		transitions = new HashSet<AbstractTransition>();
 		locations = new HashSet<Location>();
 		sendPorts = new HashSet<SendPort>();
 		this.compound = compound;
+		
+		keysValues = new LinkedList<KeyValues>();
 	}
 	
 
@@ -73,7 +77,11 @@ public abstract class Component {
 	
 	
 	public int getCurrentIndexValues() {
-		return currentIndexValues; 
+		return keysValues.size(); 
+	}
+	
+	public KeyValues getKeyValue(int index) {
+		return keysValues.get(index);
 	}
 	
 	

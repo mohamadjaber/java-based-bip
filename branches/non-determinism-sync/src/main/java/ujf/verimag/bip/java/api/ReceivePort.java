@@ -26,7 +26,7 @@ public class ReceivePort {
 	
 	public void setSynced() {
 		synced = true; 
-		component.updateSynced();
+		component.updateSynced(this);
 	}
 	
 	public void reset() {
@@ -34,7 +34,7 @@ public class ReceivePort {
 	}
 	
 	
-	public WrapType getVariable(int index) {
+	public WrapType<Object> getVariable(int index) {
 		return sendPort.getVariable(index);
 	} 
 	
@@ -45,6 +45,14 @@ public class ReceivePort {
 	
 	public boolean getSynced() {
 		return synced;
+	}
+	
+	public SyncComponent getSyncComponent() {
+		return component; 
+	}
+	
+	public Component getComponentBottom() {
+		return sendPort.getComponent();
 	}
 	
 }
