@@ -5,13 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import ujf.verimag.bip.java.types.WrapType;
+
+@SuppressWarnings("rawtypes")
 public abstract class Component {
 	protected Compound compound;
 	
 	protected Set<AbstractTransition> transitions;
 	protected Set<Location> locations;
 	protected Set<SendPort> sendPorts;
-
+	protected Set<WrapType> variables;
 	
 	protected Location initialLocation;
 	
@@ -27,6 +30,7 @@ public abstract class Component {
 		transitions = new HashSet<AbstractTransition>();
 		locations = new HashSet<Location>();
 		sendPorts = new HashSet<SendPort>();
+		variables = new HashSet<WrapType>();
 		this.compound = compound;
 		
 		currentTransitionsEnabled = new LinkedList<TransitionEnabled>();
@@ -57,6 +61,10 @@ public abstract class Component {
 	
 	public void addSendPort(SendPort p) {
 		sendPorts.add(p);
+	}
+	
+	public void addVariable(WrapType v) {
+		variables.add(v);
 	}
 	
 	public Set<SendPort> getSendPort() {

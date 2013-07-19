@@ -11,7 +11,10 @@ public class Location {
 	private List<AbstractTransition> incomingTransitions;
 
 	
-	public Location() {
+	public Location(Component component) {
+		this.component = component; 
+		this.getComponent().addLocation(this);
+
 		outgoingTransitions = new LinkedList<AbstractTransition>();
 		incomingTransitions = new LinkedList<AbstractTransition>();
 	}
@@ -22,11 +25,6 @@ public class Location {
 	
 	public List<AbstractTransition> getIncomingTransition() {
 		return incomingTransitions;
-	}
-	
-	public void setComponent(Component component) {
-		this.component = component;
-		this.getComponent().addLocation(this);
 	}
 	
 	public Component getComponent() {

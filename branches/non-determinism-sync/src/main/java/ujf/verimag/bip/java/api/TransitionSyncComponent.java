@@ -25,4 +25,5 @@ public abstract class TransitionSyncComponent extends AbstractTransition {
 		return -1; 
 	}
 
+
 }

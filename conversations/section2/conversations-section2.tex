@@ -11,62 +11,67 @@
 
 Intuitively, we consider systems built from a number of components, each
 modelled by a labelled transition system (LTS).  In order to perform a
-transition, a basic component, which we call {\em behaviour}, issues a
+transition, a basic component, which we call \emph{behaviour}, issues a
 number of requests, which are defined by the transition label and can be
-granted by higher-level components, which we call {\em conversations}.
+granted by higher-level components, which we call \emph{conversations}.
 Thus, in general, a complete transition label consists of two sets of {\em
   ports}, representing requests the transition must grant and those it must
 obtain in order to be executed.  Below we present a formal model specifying
 such behaviour as well as the implied composition operator.
 
 \begin{definition}[\compmodel{} and interactions]
-\label{defn:lts}
-A \emph{Grant-Request Labelled Transition System} (\compmodel{}) is a
-quadruple $(Q,\pin,\pout,\goesto[])$, where $Q$ is a finite set of states,
-$\pin \cap \pout = \emptyset$ are finite sets of respectively {\em grant}
-and {\em request} ports and $\goesto[] \subseteq Q \times 2^P \times Q$
-(with $P = \pin \cup \pout$) is a transition relation.  Transitions are
-labelled by \emph{interactions} $\emptyset \neq a \subseteq P$.  We define
-$q \goesto[a] q' \bydef{=}\Big((q, a, q') \in \goesto[]\Big)$ and $q
-\goesto[a]\, \bydef{=}\Big(\exists q' \in Q: q \goesto[a] q'\Big)$.
+  \label{defn:lts}
+  A \emph{Grant-Request Labelled Transition System} (\compmodel{}) is a
+  quadruple $(Q,\pin,\pout,\goesto{})$, where $Q$ is a set of states, $\pin
+  \cap \pout = \emptyset$ are finite sets of respectively \emph{grant} and
+  \emph{request} ports and $\goesto{} \subseteq Q \times 2^P \times Q$
+  (with $P = \pin \cup \pout$) is a transition relation.  Transitions are
+  labelled by \emph{interactions} $\emptyset \neq a \subseteq P$.  We
+  define $q \goesto{a} q' \bydef{=}\Big((q, a, q') \in \goesto{}\Big)$ and
+  $q \goesto{a}\, \bydef{=}\Big(\exists q' \in Q: q \goesto{a} q'\Big)$.
+  Here and below, we skip the index on $\goesto{}_i$ since it is always clear
+  from the context.
 \end{definition}
 
 \begin{notation}
   \label{ntn:lts}
-  In \defn{lts} and below, we skip the index on $\goesto_i$ since it is
-  always clear from the context.  For a \compmodel{} with the sets of grant
-  and request ports respectively $\grant{X}$ and $\request{X}$ (here, $X$
-  can be $P$, $P_i$, \etc[]) we will always denote $X \bydef{=} \grant{X}
-  \cup \request{X}$.
+  For a \compmodel{} with the sets of grant and request ports respectively
+  $\grant{X}$ and $\request{X}$ (here, $X$ can be $P$, $P_i$, \etc[]) we
+  will always denote $X \bydef{=} \grant{X} \cup \request{X}$.  Conversely,
+  for any object $X$ that can be viewed as a mapping $X : P \rightarrow \_$
+  (\eg an interaction $a$ can be viewed as the characteristic function $a :
+  P \rightarrow \{\true,\false\}$), we denote by $\grant{X}$ and
+  $\request{X}$ the respective restrictions of $X$ to $\grant{P}$ and
+  $\request{P}$.
 \end{notation}
 
 \begin{definition}[System]
   \label{defn:system}
-  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto)}{i \in [1,n]}$ be
+  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{})}{i \in [1,n]}$ be
   a finite set of \compmodel{} and denote $\pin \bydef{=} \bigcup_{i=1}^n
-  \pin_i$ and $\pout \bydef{=} \bigcup_{i=1}^n \pout_i$.  $S$ is a {\em
-    system} iff the following two conditions hold:
+  \pin_i$ and $\pout \bydef{=} \bigcup_{i=1}^n \pout_i$.  $S$ is a
+  \emph{system} iff the following two conditions hold:
   \begin{enumerate}
-  \item the sets of request ports of all the {\em components} are pairwise
+  \item the sets of request ports of all the \emph{components} are pairwise
     disjoint, \ie $\forall i \neq j,\ \pout_i \cap \pout_j = \emptyset$;
   \item any grant port belonging to more than one component is also a
-    request port of some component, \ie $\forall p, \left(\exists i \neq 
-    j: p \in \pin_i \cap \pin_j \implies p \in \pout\right)$.
+    request port of some component, \ie $\forall p, \left(\exists i \neq j:
+    p \in \pin_i \cap \pin_j \implies p \in \pout\right)$.
   \end{enumerate}
 
-  A system is {\em closed} if $\pin \subseteq \pout$.  Otherwise it is {\em
-    open}.
+  A system is \emph{closed} if $\pin \subseteq \pout$.  Otherwise it is
+  \emph{open}.
 \end{definition}
 
 To simplify the presentation, below we postulate that for any $q$, the
-predicate $q \goesto[\emptyset] q$ is true, whenever it appears in the
+predicate $q \goesto{\emptyset} q$ is true, whenever it appears in the
 premises of an SOS rule.
 
 \begin{definition}[Operational semantics of a system]
   \label{defn:composition}
   The operational semantics of a system $S = \Setdef{T_i = (Q_i, \pin_i,
-  \pout_i, \goesto)}{i \in [1,n]}$ is given by a \compmodel{} $\compose[S]
-  \bydef{=} (Q, \pin, \pout, \goesto)$, where
+    \pout_i, \goesto{})}{i \in [1,n]}$ is given by a \compmodel{}
+  $\compose[S] \bydef{=} (Q, \pin, \pout, \goesto{})$, where
   \begin{equation}
     \label{eq:composition:ports}
     Q = \prod_{i=1}^n Q_i\,,
@@ -75,18 +80,19 @@ premises of an SOS rule.
     \hspace{1cm}
     \pout = \bigcup_{i=1}^n \pout_i \setminus \bigcup_{i=1}^n \pin_i 
   \end{equation}
-  and $\goesto$ is the minimal transition relation inductively defined by
+  and $\goesto{}$ is the minimal transition relation inductively defined by
   the derivation rule
   \begin{equation}
     \label{eq:composition:transitions}
     \renewcommand{\arraystretch}{1.5}
     \derrule[3]{
       a \subseteq \bigcup_{i=1}^n P_i &
-      \forall i \in [1,n],\, (a \cap P_i \neq \emptyset \implies 
-        q_i \longgoesto[a \cap P_i] q_i') &
-      \forall i \in [1,n],\, (a \cap P_i = \emptyset \implies q_i = q_i') 
+      \forall i \in [1,n],\, \Big(a \cap P_i \neq \emptyset \implies 
+        q_i \goesto{a \cap P_i} q_i'\Big) &
+      \forall i \in [1,n],\, \Big(a \cap P_i = \emptyset \implies 
+        q_i = q_i'\Big) 
     }{
-      q_1 \dots q_n \longgoesto[a \cap P] q_1' \dots q_n'
+      q_1 \dots q_n \goesto{a \cap P} q_1' \dots q_n'
     }\,,
   \end{equation}
   with $P_i$ and $P$ as in \ntn{lts}.
@@ -99,10 +105,10 @@ premises of an SOS rule.
 
 \begin{definition}[Behaviour and conversation]
   \label{defn:components}
-  A \compmodel{} $(Q, \pin, \pout, \goesto)$ is
+  A \compmodel{} $(Q, \pin, \pout, \goesto{})$ is
   \begin{itemize}
-  \item a {\em behaviour} if $\pin  = \emptyset$;
-  \item a \emph{conversation} if, for any transition $q \goesto[a] q'$, both
+  \item a \emph{behaviour} if $\pin  = \emptyset$;
+  \item a \emph{conversation} if, for any transition $q \goesto{a} q'$, both
     $a \cap \pin \neq \emptyset$ and $a \cap \pout \neq \emptyset$.
   \end{itemize}
 \end{definition}
@@ -114,14 +120,14 @@ either a behaviour or a conversation.
 
 \begin{example}[BIP interaction models]
   \label{ex:bip}
-  Let $B_i = (Q_i, \emptyset, \pout_i, \goesto)$, for $i \in [1,n]$, be a
+  Let $B_i = (Q_i, \emptyset, \pout_i, \goesto{})$, for $i \in [1,n]$, be a
   set of behaviours with pairwise disjoint ports.  Consider $P =
   \bigcup_{i=1}^n \pout_i$ and let $\gamma \subseteq 2^P$ be a BIP
   interaction model \cite{BliSif07-acp-emsoft}.  The conversation $C_\gamma
-  = \Big(\{*\}, P, \gamma, \Setdef{* \longgoesto[a\cup\{a\}] *}{a \in
-  \gamma}\Big)$ realises the same coordination as the one imposed by
+  = \Big(\{*\}, P, \gamma, \Setdef{* \goesto{a\cup\{a\}} *}{a \in
+    \gamma}\Big)$ realises the same coordination as the one imposed by
   $\gamma$, \ie $C_\gamma(B_1, \dots, B_n) \bydef{=} \compose[\{C_\gamma,
-  B_1, \dots, B_n\}] = \gamma(B_1, \dots, B_n)$, where the latter is the
+    B_1, \dots, B_n\}] = \gamma(B_1, \dots, B_n)$, where the latter is the
   composed component obtained by applying the interaction model $\gamma$ to
   behaviours $B_1, \dots, B_n$ with the operational semantics defined in
   \cite{BliSif07-acp-emsoft}.
@@ -133,20 +139,21 @@ either a behaviour or a conversation.
 \end{example}
 
 \begin{definition}[Topologies]
-  The {\em topology} of a system $S$ is a directed graph $\topo{S} =
-  (S, E)$, having the components of the system as vertices and the set
-  of edges $E = \setdef{(T_i,T_j)}{\pout_i \cap \pin_j \neq
-    \emptyset}$.  In other words, there is an edge from $T_i$ to $T_j$
-  if some of the requests of the former can be granted by the latter.
+  \label{defn:topology}
+  The \emph{topology} of a system $S$ is a directed graph $\topo{S} = (S,
+  E)$, having the components of the system as vertices and the set of edges
+  $E = \setdef{(T_i,T_j)}{\pout_i \cap \pin_j \neq \emptyset}$.  In other
+  words, there is an edge from $T_i$ to $T_j$ if some of the requests of
+  the former can be granted by the latter.
 
-  If $\topo{S}$ is a directed acyclic graph (DAG), the $S$ is a {\em
-  flow-system}.  If $\topo{S}$ is disconnected, \ie $E = \emptyset$, the
-  system is {\em independent}.
+  If $\topo{S}$ is a directed acyclic graph (DAG), the $S$ is a
+  \emph{flow-system}.  If $\topo{S}$ is disconnected, \ie $E = \emptyset$,
+  the system is \emph{independent}.
 \end{definition}
 
 Observe that any non-trivial (\ie non-empty) closed flow-system $S$
 necessarily contains a certain number of behaviours.  Each conversation can
-be assigned a {\em level} defined as the maximal length of a directed path
+be assigned a \emph{level} defined as the maximal length of a directed path
 in $\topo{S}$ from some behaviour to this conversation.
 
 Composition defined by the operational semantics of systems allows
@@ -171,13 +178,124 @@ interaction has been choosen at the top level, the updated data is
 propagated back to behaviours.  Below, we present this in a formal manner.
 
 \begin{definition}[\compmodel{} with data]
-  A {\em \compmodel{} with data} is a tuple $(T, \data[i], \data[l],
-  \data[o], up, down)$, where $T = (Q, \pin, \pout, \goesto)$ is a
-  \compmodel{}, $\data[i]$, $\data[l]$ and $\data[o]$ are respectively the
-  domains of {\em input}, {\em local} and {\em output} data, and $up$ and
-  $down$ are mappings from the transition relation $\goesto$ to
-  functions $(\data[l] \times \data[o])^{\data[i]}$ and $\data$
+  \label{defn:data}
+  A \emph{\compmodel{} with data} is a tuple $T=(Q, \local{\data}, \data,
+  \pin, \pout,$ \mbox{$\goesto{}$,} $\guard, \up, \down)$, where
+  \begin{itemize}
+  \item $(Q, \pin, \pout, \goesto{})$ is a \compmodel{},
+  \item $\local{\data}$ is the \emph{local data domain},
+  \item $\data = (\data[p])_{p \in P}$ is a family of \emph{data domains
+    associated to ports} of the system,
+  \item $\guard$ is the \emph{guard} mapping associating to each transition
+    $t = q \goesto{a} q'$ a boolean guard $\guard(t): \local{\data} \times
+    \data[\grant{a}] \rightarrow \{\true,\false\}$,
+  \item $\up$ and $\down$ are \emph{data transfer} mappings associating to
+    each transition $t = q \goesto{a} q'$ two transfer functions $\up(t):
+    \local{\data} \times \data[\grant{a}] \rightarrow \local{\data} \times
+    \data[\request{a}]$ and $\down(t): \local{\data} \times \data[P]
+    \rightarrow \local{\data} \times \data[\grant{a}]$, where we denote,
+    for a set of ports $X \subseteq P$, $\data[X] \bydef{=} \prod_{p \in X}
+    \data[p]$.  $\up(t)$ propagates the data up from the grant ports to the
+    request ports, whereas $\down(t)$ computes new values for the grant
+    port variables.  Both functions can update the local variable.
+  \end{itemize}
+
+  By abuse of notation, we write $q \goesto{a,\guard,\up,\down} q'$ for
+  the transition $q \goesto{a} q' \in\, \goesto{}$ and the associated guard
+  and data transfer functions.
 \end{definition}
+
+Notice that, in \defn{data}, all the data preserved between two execution
+cycles is stored in the local variable.  Thus, during the upward
+propagation, data associated to request ports are not taken into account.
+On the contrary, downward propagation takes into account all data.  Precise
+operational semantics of a \compmodel{} with data is given by the following
+definition.
+
+\begin{definition}[Component operational semantics with data]
+  \label{defn:data:semantics}
+  The operational semantics of a \compmodel{} with data $T = (Q,
+  \local{\data}, \data, \pin, \pout, \goesto{}, \guard, \up, \down)$ is
+  given by an LTS $\undata{T} = (Q \times \local{\data}, 2^P \times
+  \data[2]$, \mbox{$\goesto{})$}, where a state $(q, v)$ consists of a
+  control state of $T$ and the valuation $v \in \local{\data}$;
+  $\goesto{}$ is the minimal transition relation inductively defined by the
+  following rule:
+  \begin{equation}
+    \label{eq:data:semantics}
+    \renewcommand{\arraystretch}{1.5}
+    \derrule[4]{
+      q \goesto{a,\guard,\up,\down} q'
+      &
+      \guard(v, \grant{\portdata{v}}) = \true
+      &
+      \request{\portdata{v}} = 
+      \request{\up}(v, \grant{\portdata{v}})
+      &
+      (v', \grant{\portdata{\tilde{v}}}) =
+      \down\Big(
+      \local{\up}(v, \grant{\portdata{v}}),
+      \request{\portdata{\tilde{v}}}, 
+      \grant{\portdata{v}}
+      \Big)
+    }{
+      (q, v)
+      \goesto[\portdata{v}:\portdata{\tilde{v}}]{a}
+      (q', v')
+    }\,,
+  \end{equation}
+  where $\local{\up}$ and $\request{\up}$ are the two components of the
+  $\up$ function; $\portdata{v}$ and $\portdata{\tilde{v}}$ are \emph{data
+  valuations associated to ports at the upward and downward data transfer
+  phases} respectively.
+\end{definition}
+
+For the valuations $\portdata{v}$ and $\portdata{\tilde{v}}$, in
+\eq{data:semantics}, it is important to notice the difference with the
+input/output dichotomy.  Indeed, the component \emph{input} is the pair
+$(\grant{\portdata{v}}, \request{\portdata{\tilde{v}}})$, whereas its
+\emph{output} is the pair $(\grant{\portdata{\tilde{v}}},
+\request{\portdata{v}})$.  Hence, the only constraint on
+$(\grant{\portdata{v}}, \request{\portdata{\tilde{v}}})$ is the guard in
+the second premise.
+
+%% It is important to notice that, in \eq{data:semantics}, the request
+%% component of the upward transfer function $\up$ is discarded and both the
+%% downward transfer and destination state rely on the unrestricted value
+%% $\portdata{v}$. This reflects the fact that, as discussed above, at each
+%% execution cycle the data associated to all the ports is discarded.  In a
+%% closed system, there are two phases: in the upwards transfer phase, the
+%% values associated to the grant ports are initialised by the corresponding
+%% request ports in the components one level down in the topology and
+%% vice-versa, in the downwards transfer phase.
+
+\begin{definition}[System operational semantics with data]
+  \label{defn:data:composition}
+  Let $S = \setdef{T_i = (Q_i, \local{\data}_i, \data_i, \pin_i,
+    \pout_i, \goesto{}, \guard_i, \up_i, \down_i)}{i \in [1,n]}$ be a
+  set of \compmodel{} with data, such that the underlying \compmodel{}
+  form a flow-system (\defn{topology}).  We call $S$ a
+  \emph{flow-system with data} if the data domains agree on ports
+  belonging to several components:
+  \begin{equation}
+    \label{eq:data:coherency}
+    \forall p \in P,\ \forall i,j \in [1,n],\ 
+    \left(
+    p \in P_i \cap P_j \implies \data[p]_i = \data[p]_j
+    \right)\,,
+  \end{equation}
+  where $P \bydef{=} \bigcup_{i=1}^n P_i$.
+
+  \begin{equation}
+    \label{eq:data:composition}
+    \derrule{
+      
+    }{      
+      \dots
+    }
+  \end{equation}
+\end{definition}
+
 % *********************************************************************
 
 \subsection{Expressiveness Results}

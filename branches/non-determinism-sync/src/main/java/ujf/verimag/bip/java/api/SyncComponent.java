@@ -1,6 +1,5 @@
 package ujf.verimag.bip.java.api;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -8,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import ujf.verimag.bip.java.types.WrapType;
+
+@SuppressWarnings("rawtypes")
 public abstract class SyncComponent extends Component {
 	
 	private Set<ReceivePort> receivePorts;
@@ -17,12 +19,14 @@ public abstract class SyncComponent extends Component {
 	
 	private ReceivePort currentNotifiedPort;
 	
+	private int indexToExecute;
 	
 	public SyncComponent(Compound compound) {
 		super(compound);
 		receivePorts = new HashSet<ReceivePort>();
 		compound.getSyncComponents().add(this);
 		notifications = new HashMap<ReceivePort, List<Integer>>();
+		indexToExecute = -1;
 	}
 	
 	public Set<ReceivePort> getReceivePort() {
@@ -38,19 +42,6 @@ public abstract class SyncComponent extends Component {
 	
 	public void addTransition(TransitionSyncComponent trans) {
 		transitions.add(trans);
-		Location from = trans.getOrigin();
-		Location to = trans.getDestination();
-		SendPort sendPort = trans.getSendPort();
-		ReceivePort[] receivePorts = trans.getReceivePorts();
-		
-		from.setComponent(this);
-		to.setComponent(this);
-		if(sendPort != null)
-			sendPort.setComponent(this);
-		for(ReceivePort rp : receivePorts) {
-			rp.setComponent(this);
-			this.receivePorts.add(rp);
-		}
 	}
 	
 	
@@ -76,14 +67,11 @@ public abstract class SyncComponent extends Component {
 		
 		for(TransitionEnabled transitionEnabled: currentTransitionsEnabled) {
 			TransitionSyncComponent transition = transitionEnabled.getTransition();
-			for(ReceivePort receivePort: transition.getReceivePorts()) {
-				receivePort.getComponentBottom().setIndexTransitionEnabled(transitionEnabled.getBottomIndex(receivePort));
-				
-				if(transition.guard()) {
-					allTransitionsEnabled.add(transitionEnabled);
-					transition.upAction();
-					if(transition.getSendPort() != null) transition.getSendPort().setSynced();
-				}
+			transitionEnabled.updateBottomIndices();
+			if(transition.guard()) {
+				allTransitionsEnabled.add(transitionEnabled);
+				transition.upAction();
+				if(transition.getSendPort() != null) transition.getSendPort().setSynced();
 			}
 		}
 	}
@@ -126,7 +114,7 @@ public abstract class SyncComponent extends Component {
 		ReceivePort rcvPort = transition.getReceivePorts()[indexReceivePort];
 		if(rcvPort.equals(currentNotifiedPort)) {
 			TransitionEnabled transitionEnabledTmp = new TransitionEnabled(transitionEnabled);
-			transitionEnabledTmp.getBottomIndices().add(rcvPort.getComponentBottom().getCurrentIndexNotified());
+			transitionEnabledTmp.setBottomIndex(indexReceivePort,  rcvPort.getComponentBottom().getCurrentIndexNotified());
 			constructTransitionEnabled(transition, indexReceivePort + 1, transitionEnabledTmp);
 		}
 		else {
@@ -134,7 +122,7 @@ public abstract class SyncComponent extends Component {
 
 			for(int i = 0; i < countReceivedPort; i++) {
 				TransitionEnabled transitionEnabledTmp = new TransitionEnabled(transitionEnabled);
-				transitionEnabledTmp.getBottomIndices().add(rcvPort.getComponentBottom().getCurrentIndexNotified());
+				transitionEnabledTmp.setBottomIndex(indexReceivePort,  rcvPort.getComponentBottom().getCurrentIndexNotified());
 				constructTransitionEnabled(transition, indexReceivePort + 1, transitionEnabledTmp);
 				
 			}
@@ -152,12 +140,37 @@ public abstract class SyncComponent extends Component {
 
 	
 	
+	private boolean checkIndex(int index) {
+		if(indexToExecute != -1) {
+			if(index != indexToExecute) {
+				System.out.println("Conflict data detection");
+				System.exit(0);
+			} else { // We allow conflict on the same index, but possible data override. 
+				System.out.println("Warning.");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	
+	private void updateOriginalValues() {
+		for(WrapType variable: variables) {
+			variable.updateOriginalValue();
+		}
+	}
 	
 	public void propagateEnablePorts(Map<BaseComponent, SendPort> componentEnablePort, int index) {
-		TransitionSyncComponent transition =  (TransitionSyncComponent) keysValues.get(index).getTransition();
+	
+		if(!checkIndex(index))
+			return; // index already executed
+			
+		indexToExecute = index; 
+		TransitionEnabled transitionEnabled = allTransitionsEnabled.get(indexToExecute);
+		TransitionSyncComponent transition = transitionEnabled.getTransition();
 		
-		
-		
+		transitionEnabled.updateBottomIndices();	
+		updateOriginalValues();
 		transition.action();
 		setCurrentLocation(transition.getDestination());
 		
@@ -173,16 +186,16 @@ public abstract class SyncComponent extends Component {
 				 *  The connection should be tree at run-time. 
 				 *  otherwise semantic error, a base component receives to execute multiple ports.
 				 */
-				// 
-				if(componentEnablePort.get(component) != null) {
+				if(componentEnablePort.get(component) != null &&
+						componentEnablePort.get(component).equals(sendPort)) {
 					System.out.println("DAG detection - Component" + component + " has been notified two times");
 					System.exit(0);
 				}
-				
 				componentEnablePort.put((BaseComponent) component, sendPort);
+				//TODO propagate disable conflict.
 			}
 			else {
-				((SyncComponent) component).propagateEnablePorts(componentEnablePort);
+				((SyncComponent) component).propagateEnablePorts(componentEnablePort, transitionEnabled.getBottomIndex(receivePorts[i]));
 			}
 		}
 	}

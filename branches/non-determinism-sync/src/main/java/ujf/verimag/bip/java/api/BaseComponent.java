@@ -47,14 +47,6 @@ public abstract class BaseComponent extends Component implements Runnable {
 	
 	public void addTransition(Transition trans) {
 		transitions.add(trans);
-		
-		Location from = trans.getOrigin();
-		Location to = trans.getDestination();
-		SendPort sendPort = trans.getSendPort();
-				
-		from.setComponent(this);
-		to.setComponent(this);
-		sendPort.setComponent(this);
 	}
 	
 

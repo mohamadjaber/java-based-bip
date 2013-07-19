@@ -1,7 +1,6 @@
 package ujf.verimag.bip.java.example1;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,15 +12,6 @@ public class Test {
 				{5, 6},
 				{7, 8, 9}
 		};
-		
-		
-		char[][] c = {
-				{'a', 'b', 'c'},
-				{'d', 'e'},
-				{'f','g'}
-		};
-		
-	//	combos(0,c, "");
 		
 		allCombinations(a);
 		
@@ -42,8 +32,6 @@ public class Test {
 		
 	}
 	
-
-	
 	
 	private static void allCombinations(int[][] a, int pos, LinkedList<LinkedList<Integer>> outputs, LinkedList<Integer> currentOutput) {
 		if(pos == a.length) {
@@ -57,6 +45,4 @@ public class Test {
 		}
 		
 	}
-
-
 }

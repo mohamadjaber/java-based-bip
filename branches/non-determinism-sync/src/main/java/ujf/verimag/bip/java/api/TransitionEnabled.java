@@ -1,7 +1,6 @@
 package ujf.verimag.bip.java.api;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * 
@@ -9,44 +8,52 @@ import java.util.List;
  */
 public class TransitionEnabled {
 	private TransitionSyncComponent transition;
-	private List<Integer> bottomIndices; 
+	private int[] bottomIndices; 
 	
 	public TransitionEnabled(TransitionSyncComponent t) {
 		transition = t;
-		bottomIndices = new LinkedList<Integer>();
+		bottomIndices = new int[transition.getReceivePorts().length];
 	}
 	
 	
 	public TransitionEnabled(TransitionEnabled te) {
 		this.transition = te.transition; 
-		bottomIndices = new LinkedList<Integer>(te.bottomIndices);
+		bottomIndices = Arrays.copyOf(te.bottomIndices, te.bottomIndices.length);
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if(o instanceof TransitionEnabled) {
-			TransitionEnabled keyValues = (TransitionEnabled) o;
-			if(!keyValues.transition.equals(transition))
+			TransitionEnabled transitionEnabled = (TransitionEnabled) o;
+			if(!transitionEnabled.transition.equals(transition))
 				return false;
-			if(bottomIndices.size() != keyValues.bottomIndices.size())
-				return false;
-			for(int i = 0; i < bottomIndices.size(); i++)
-				if(bottomIndices.get(i) != keyValues.bottomIndices.get(i))
-					return false;
-			return true;
+			return Arrays.equals(bottomIndices, transitionEnabled.bottomIndices);
 		}
 		return super.equals(o);
 	}
 	
 	
-	public Integer getBottomIndex(ReceivePort rcvPort) {
-		assert(transition.getIndexReceivePort(rcvPort) != -1);
-		return bottomIndices.get(transition.getIndexReceivePort(rcvPort));
+	public void updateBottomIndices() {
+		for(int i = 0; i < transition.getReceivePorts().length; i++) {
+			ReceivePort rcvPort = transition.getReceivePorts()[i];
+			Component bottomComponent = rcvPort.getSendPort().getComponent();
+			if(bottomComponent instanceof SyncComponent) {
+				bottomComponent.setIndexTransitionEnabled(bottomIndices[i]);
+			}
+		}
 	}
 	
-	public List<Integer> getBottomIndices() {
-		return bottomIndices;
+	
+	public int getBottomIndex(ReceivePort rcvPort) {
+		assert(transition.getIndexReceivePort(rcvPort) != -1);
+		return bottomIndices[transition.getIndexReceivePort(rcvPort)];
 	}
+	
+	public void setBottomIndex(int index, int value) {
+		assert(index > 0 && index < bottomIndices.length);
+		bottomIndices[index] = value; 
+	}
+
 	
 	public TransitionSyncComponent getTransition() {
 		return transition;

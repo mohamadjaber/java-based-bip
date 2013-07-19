@@ -9,7 +9,9 @@ public class ReceivePort {
 	
 	private boolean synced;
 	
-	public ReceivePort() {
+	public ReceivePort(SyncComponent component) {
+		this.component = component; 
+		this.component.getReceivePort().add(this);
 	}
 	
 	public void connect(SendPort sendPort) {
@@ -37,11 +39,7 @@ public class ReceivePort {
 	public WrapType<Object> getVariable(int index) {
 		return sendPort.getVariable(index);
 	} 
-	
-	public void setComponent(SyncComponent component) {
-		this.component = component; 
-		this.component.getReceivePort().add(this);
-	}
+
 	
 	public boolean getSynced() {
 		return synced;

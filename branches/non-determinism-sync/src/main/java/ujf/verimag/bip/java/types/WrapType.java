@@ -3,6 +3,7 @@ package ujf.verimag.bip.java.types;
 import java.util.LinkedList;
 import java.util.List;
 
+import ujf.verimag.bip.java.api.BaseComponent;
 import ujf.verimag.bip.java.api.Component;
 
 /**
@@ -13,44 +14,58 @@ import ujf.verimag.bip.java.api.Component;
 public class WrapType<T> { 
 	
 	private Component component; 
+	private T originalValue;
 	
 	/**
-	 * values[0] contains the original value of the variable. 
-	 * The other indices contain other copies depending on the up actions  (non-deterministic transitions)
-	 * and different values received from the bottom component.  
+	 * Temporary copies of the original value. This is used to handle non-deterministic choice in the sync Components.
+	 * Depending on the up actions (non-deterministic transitions) and different values received from the bottom component.  
 	 */
 	private List<T> copyValues;
 		
 	
 	public WrapType(Component component, T value) {
 		this(component);
-		// original value.
-		copyValues.add(value);
+		originalValue = value; 
 	}
 	
 	
 	public WrapType(Component component) {
 		copyValues = new LinkedList<T>();
-		copyValues.add(null);
 		this.component = component; 
+		this.component.addVariable(this);
+		originalValue = null;
 	}
 	
 	private void expands() {
 		int lastIndex = copyValues.size() - 1;
-		T originalValue = copyValues.get(0);
 		while(lastIndex < component.getIndexTransitionEnabled()) {
 			copyValues.add(originalValue);
 			lastIndex++;
 		}
 	}
 	
+	public void updateOriginalValue() {
+		int index = component.getIndexTransitionEnabled();
+		if(index > 0) {
+			assert(index < copyValues.size());
+			originalValue = copyValues.get(index);
+		}
+	}
+	
 	public T getValue() {
+		if(component instanceof BaseComponent)
+			return originalValue;
+		
 		expands();
 		return copyValues.get(component.getIndexTransitionEnabled());
 	}
 	
 	
 	public void setValue(T value) {
+		if(component instanceof BaseComponent) {
+			originalValue = value;
+			return;
+		}
 		expands();
 		copyValues.set(component.getIndexTransitionEnabled(), value); 
 	}

@@ -73,24 +73,30 @@
 \newcommand{\negsup}[1]{\ensuremath{\mathbf{neg}{\left(#1\right)}}}
 \newcommand{\offer}[1][]{\ensuremath{\!\uparrow\!{#1}}}
 \newcommand{\noffer}[1][]{\ensuremath{\!\not\,\uparrow\!{#1}}}
-\newcommand{\goesto}[1][]{\ensuremath{\stackrel{#1}{\rightarrow}^{}}}
-\newcommand{\longgoesto}[1][]{\ensuremath{\stackrel{#1}{\longrightarrow}}}
+\newcommand{\goesto}[2][]{\ensuremath{\xrightarrow[#1]{#2}}}
+\newcommand{\longgoesto}{\goesto}%[1][]{\ensuremath{\stackrel{#1}{\longrightarrow}}}
 \newcommand{\symmdiff}[2]{\ensuremath{{#1}\triangle{#2}}}
 \newcommand{\glue}[1][]{\ensuremath{{\cal G}^{#1}}}
 \newcommand{\glues}{\ensuremath{{\cal G}lue}}
 \newcommand{\less}{\prec}
 
 \newcommand{\compmodel}{GR-LTS}
-\newcommand{\ddomain}{\ensuremath{\cD}}
-\newcommand{\data}[1][]{\ensuremath{\cD_{#1}}}
 \newcommand{\grant}[1]{\ensuremath{{#1}^{g}}}
 \newcommand{\request}[1]{\ensuremath{{#1}^{r}}}
 \newcommand{\pin}{\grant{P}}
 \newcommand{\pout}{\request{P}}
-\newcommand{\topo}[1]{\ensuremath{\tau(#1)}}
+\newcommand{\topo}[1]{\ensuremath{\tau({#1})}}
 \newcommand{\compose}[1][\ ]{\ensuremath{\ \parallel\!\!{#1}}}
-\newcommand{\true}{\ensuremath{\mathtt{tt}}}
-\newcommand{\false}{\ensuremath{\mathtt{ff}}}
+\newcommand{\true}{\ensuremath{\mathtt{t\!t}}}
+\newcommand{\false}{\ensuremath{\mathtt{f\!f}}}
+\newcommand{\data}[1][]{\ensuremath{\cD^{#1}}}
+\newcommand{\datavar}[2][]{\ensuremath{{#2}^{#1}}}
+\newcommand{\local}[1]{\ensuremath{{#1}^{l}}}
+\newcommand{\guard}{\ensuremath{g}}
+\newcommand{\up}{\ensuremath{u}}
+\newcommand{\down}{\ensuremath{d}}
+\newcommand{\undata}[1]{\ensuremath{\sigma({#1})}}
+\newcommand{\portdata}[1]{\ensuremath{\mathbf{#1}}}
 
 \newcommand{\intsem}[1]{\ensuremath{\|{#1}\|}}
 \newcommand{\aisem}[1]{\ensuremath{|{#1}|}}
