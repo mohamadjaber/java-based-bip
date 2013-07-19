@@ -17,7 +17,11 @@ public abstract class Component {
 	
 	protected Location currentLocation; 
 	
-	protected List<KeyValues> keysValues;
+	protected List<TransitionEnabled> currentTransitionsEnabled;
+	protected List<TransitionEnabled> allTransitionsEnabled;
+	
+	private int indexTransitionEnabled;
+
 	
 	public Component(Compound compound) {
 		transitions = new HashSet<AbstractTransition>();
@@ -25,7 +29,8 @@ public abstract class Component {
 		sendPorts = new HashSet<SendPort>();
 		this.compound = compound;
 		
-		keysValues = new LinkedList<KeyValues>();
+		currentTransitionsEnabled = new LinkedList<TransitionEnabled>();
+		allTransitionsEnabled = new LinkedList<TransitionEnabled>();
 	}
 	
 
@@ -75,15 +80,19 @@ public abstract class Component {
 		currentLocation = l; 
 	}
 	
-	
-	public int getCurrentIndexValues() {
-		return keysValues.size(); 
+	public int getCurrentIndexNotified() {
+		return allTransitionsEnabled.size();
 	}
 	
-	public KeyValues getKeyValue(int index) {
-		return keysValues.get(index);
+	public void setIndexTransitionEnabled(int index) {
+		indexTransitionEnabled = index; 
 	}
 	
+	public int getIndexTransitionEnabled() {
+		return indexTransitionEnabled;
+	}
 	
-	
+	public TransitionEnabled getTransitionEnabled(int index) {
+		return currentTransitionsEnabled.get(index);
+	}
 }

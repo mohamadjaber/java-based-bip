@@ -80,7 +80,7 @@ public abstract class SyncComponent extends Component {
 	
 	/**
 	 * This method is called when a receive port calls synced, that is a receive port is notified to be enable. 
-	 * We assume that the SyncComponent are deterministic. This is necessary because otherwise we need to propagate, 
+	 * We assume that the SyncComponents are deterministic. This is necessary because otherwise we need to propagate, 
 	 * for each up action, a value per each port variable. We cannot take one random enable transition because 
 	 * the upper sync component may not be enabled. However, in this method we are taking the first enable transition 
 	 * as we assume that it is not possible to have outgoing transitions which are enable at the same time. 
@@ -88,22 +88,30 @@ public abstract class SyncComponent extends Component {
 	 * because from the assumption we have the other transition could not be enabled. 
 	 */
 	public synchronized void updateSynced() {
-		outerLoop:
 		for(AbstractTransition t: currentLocation.getOutgoingTransition()) {
 			TransitionSyncComponent transition = (TransitionSyncComponent) t; 
 			
-			for(ReceivePort receivePort: transition.getReceivePorts()) 
-				if(!receivePort.getSynced()) continue outerLoop;
-			
-			if(transition.guard()) {
+			if(isPartialEnable(transition) && transition.guard()) {
 				transition.upAction();
 				isEnable = true; 
 				currentTransition = transition; 
 				if(transition.getSendPort() != null)
 					transition.getSendPort().setSynced();
-				break; 
+				return; // deterministic sync component
 			}
 		}
+	}
+	
+	
+	/**
+	 * 
+	 * @param t
+	 * @return true if all the received ports of the transition t has been notified, false otherwise.
+	 */
+	private boolean isPartialEnable(TransitionSyncComponent t) {
+		for(ReceivePort receivePort: t.getReceivePorts()) 
+			if(!receivePort.getSynced()) return false;
+		return true; 
 	}
 	
 	/**
@@ -131,16 +139,17 @@ public abstract class SyncComponent extends Component {
 				 *  The connection should be tree at run-time. 
 				 *  otherwise semantic error, a base component receives to execute multiple ports.
 				 */
-				// 
-				if(componentEnablePort.get(component) != null 
-						&& componentEnablePort.get(component)!= sendPort) { // Allows conflict on the same port, following Simon Bliudze Semantics.
-																			// If not remove the second condition of the guard. 
-																			// But data transfer override. 
+				if(componentEnablePort.get(component) != null) { // conflict detection
+					
+					// Allows conflict on the same port, following Simon Bliudze Semantics.
+					if( componentEnablePort.get(component).equals(sendPort) ) return; 
+					
 					System.out.println("DAG detection - Component: " + component + " has been notified two times");
 					System.exit(0);
 				}
 				
 				componentEnablePort.put((BaseComponent) component, sendPort);
+				sendPort.conflictReset();
 			}
 			else {
 				((SyncComponent) component).propagateEnablePorts(componentEnablePort);

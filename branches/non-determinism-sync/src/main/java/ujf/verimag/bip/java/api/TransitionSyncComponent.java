@@ -16,5 +16,13 @@ public abstract class TransitionSyncComponent extends AbstractTransition {
 	public ReceivePort[] getReceivePorts() {
 		return receivePorts;
 	}
+	
+	
+	public int getIndexReceivePort(ReceivePort rcvPort) {
+		for(int i = 0; i < receivePorts.length; i++) 
+			if(receivePorts[i].equals(rcvPort))
+				return i;
+		return -1; 
+	}
 
 }

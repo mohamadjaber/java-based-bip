@@ -96,14 +96,11 @@ public class EngineImpl implements Engine {
 			if(!topEnableSyncComponentSelected.contains(syncComponent) 
 					&& syncComponent.isTop() 
 					&& syncComponent.isEnable()) {
-				
 				topEnableSyncComponent.add(syncComponent);
-				return true;
 			}
 		}
-		return false;
+		return topEnableSyncComponent.size() > 0;
 	}
-	
 	
 	
 	/**

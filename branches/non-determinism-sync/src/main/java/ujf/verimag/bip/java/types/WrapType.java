@@ -38,7 +38,7 @@ public class WrapType<T> {
 	private void expands() {
 		int lastIndex = copyValues.size() - 1;
 		T originalValue = copyValues.get(0);
-		while(lastIndex < component.getCurrentIndexValues()) {
+		while(lastIndex < component.getIndexTransitionEnabled()) {
 			copyValues.add(originalValue);
 			lastIndex++;
 		}
@@ -46,13 +46,13 @@ public class WrapType<T> {
 	
 	public T getValue() {
 		expands();
-		return copyValues.get(component.getCurrentIndexValues());
+		return copyValues.get(component.getIndexTransitionEnabled());
 	}
 	
 	
 	public void setValue(T value) {
 		expands();
-		copyValues.set(component.getCurrentIndexValues(), value); 
+		copyValues.set(component.getIndexTransitionEnabled(), value); 
 	}
 
 }

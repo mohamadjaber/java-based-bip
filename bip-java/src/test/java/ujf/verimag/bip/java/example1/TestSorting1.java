@@ -10,12 +10,16 @@ import ujf.verimag.bip.java.api.Compound;
 import ujf.verimag.bip.java.engine.EngineImpl;
 
 public class TestSorting1  extends Compound {
+	
+	
 	public TestSorting1() {
+		final int size = 5;
+		assert size > 2;
 		// Base Components
-		ArrayAtom comp1 = new ArrayAtom(this, 10);
-		ArrayAtom comp2 = new ArrayAtom(this, 10);
-		ArrayAtom comp3 = new ArrayAtom(this, 10);
-		ArrayAtom comp4 = new ArrayAtom(this, 10);
+		ArrayAtom comp1 = new ArrayAtom(this, size, 1);
+		ArrayAtom comp2 = new ArrayAtom(this, size, 2);
+		ArrayAtom comp3 = new ArrayAtom(this, size, 3);
+		ArrayAtom comp4 = new ArrayAtom(this, size, 4);
 
 		
 		// Sync Components
@@ -46,7 +50,7 @@ public class TestSorting1  extends Compound {
 
 	
 	@Test
-	public void testMain() throws InterruptedException  {
+	public void testMain() throws InterruptedException  {		
 		TestSorting1 top = new TestSorting1();
 		EngineImpl engine = new EngineImpl(top);
 		engine.getThread().join();

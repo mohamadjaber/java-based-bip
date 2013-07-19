@@ -1,7 +1,5 @@
 package ujf.verimag.bip.java.example1;
 
-
-
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -9,32 +7,48 @@ import org.junit.Test;
 import ujf.verimag.bip.java.api.Compound;
 import ujf.verimag.bip.java.engine.EngineImpl;
 
-
 public class TestSorting4 extends Compound {
 	
-	public TestSorting4() {
-		// Base Components
-		ArrayAtom comp1 = new ArrayAtom(this, 10);
-		ArrayAtom comp2 = new ArrayAtom(this, 10);
-		ArrayAtom comp3 = new ArrayAtom(this, 10);
-		ArrayAtom comp4 = new ArrayAtom(this, 10);
-
+	private int nbOfAtoms = 4; // should be equal 2^n (n >= 2)
+	private int sizeLocalArray = 5;
+	
+	public TestSorting4() {		
+		ArrayAtom[] baseComponents = new ArrayAtom[nbOfAtoms];
+		for(int i = 0; i < nbOfAtoms; i++) {
+			baseComponents[i] = new ArrayAtom(this, sizeLocalArray, i);
+		}
 		
-		// Sync Components
-		ExchangeFinish sync1 = new ExchangeFinish(this);
-		ExchangeFinish sync2 = new ExchangeFinish(this);
+		int nbLayerFinishExchange = (int) (Math.log(nbOfAtoms) / Math.log(2)) - 1; 
+				
+		int nbExchangeFinishPerLayer = nbOfAtoms/2;
+		ExchangeFinish[][] syncExchangesFinishes = new ExchangeFinish[ nbLayerFinishExchange ][];
 
+		for(int i = 0; i < nbLayerFinishExchange; i++) {
+			syncExchangesFinishes[i] = new ExchangeFinish[nbExchangeFinishPerLayer];
+			for(int j = 0; j < nbExchangeFinishPerLayer; j++) {
+				syncExchangesFinishes[i][j] = new ExchangeFinish(this);
+			}
+			nbExchangeFinishPerLayer /= 2;
+		}
+
+		for(int i = 0; i < nbOfAtoms/2; i++) {
+			syncExchangesFinishes[0][i].p1.connect(baseComponents[2*i].work);
+			syncExchangesFinishes[0][i].p2.connect(baseComponents[2*i + 1].work);
+		}
+
+		nbExchangeFinishPerLayer = nbOfAtoms/4;
+		for(int i = 1; i < nbLayerFinishExchange; i++) {
+			for(int j = 0; j < nbExchangeFinishPerLayer; j++) {				
+				syncExchangesFinishes[i][j].p1.connect(syncExchangesFinishes[i-1][j*2].work);
+				syncExchangesFinishes[i][j].p2.connect(syncExchangesFinishes[i-1][j*2 + 1].work);
+			}
+			nbExchangeFinishPerLayer /= 2;
+		}
+		
 		Exchange top = new Exchange(this);
-		
-		// Connections
-		sync1.p1.connect(comp1.work);
-		sync1.p2.connect(comp2.work);
-		
-		sync2.p1.connect(comp3.work);
-		sync2.p2.connect(comp4.work);
-		
-		top.p1.connect(sync1.work);
-		top.p2.connect(sync2.work);
+		int i = nbLayerFinishExchange - 1; 
+		top.p1.connect(syncExchangesFinishes[i][0].work);
+		top.p2.connect(syncExchangesFinishes[i][1].work);
 	}
 	
 	@Test
@@ -46,3 +60,4 @@ public class TestSorting4 extends Compound {
 	}
 	
 }
+

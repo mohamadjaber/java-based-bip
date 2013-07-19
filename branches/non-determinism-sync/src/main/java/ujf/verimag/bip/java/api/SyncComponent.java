@@ -1,7 +1,9 @@
 package ujf.verimag.bip.java.api;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -11,14 +13,16 @@ public abstract class SyncComponent extends Component {
 	private Set<ReceivePort> receivePorts;
 	
 
-	private Map<ReceivePort, Integer> notifications; 
+	private Map<ReceivePort, List<Integer>> notifications; 
+	
+	private ReceivePort currentNotifiedPort;
 	
 	
 	public SyncComponent(Compound compound) {
 		super(compound);
 		receivePorts = new HashSet<ReceivePort>();
 		compound.getSyncComponents().add(this);
-		notifications = new HashMap<ReceivePort, Integer>();
+		notifications = new HashMap<ReceivePort, List<Integer>>();
 	}
 	
 	public Set<ReceivePort> getReceivePort() {
@@ -49,29 +53,101 @@ public abstract class SyncComponent extends Component {
 		}
 	}
 	
+	
+	
+
+	private void updateNotifications() {
+		int indexTransitionEnabledBottom = currentNotifiedPort.getComponentBottom().getCurrentIndexNotified();
+		if(notifications.containsKey(currentNotifiedPort)) {
+			notifications.get(currentNotifiedPort).add(indexTransitionEnabledBottom);
+		}
+		else {
+			List<Integer> indicesTransitionEnabledBottom = new LinkedList<Integer>();
+			indicesTransitionEnabledBottom.add(indexTransitionEnabledBottom);
+			notifications.put(currentNotifiedPort, indicesTransitionEnabledBottom);
+		}
+	}
 
 	public synchronized void updateSynced(ReceivePort rcvPort) {
-		notifications.put(rcvPort, rcvPort.getComponentBottom().getCurrentIndexValues());
-
-		outerLoop:
+		currentNotifiedPort = rcvPort;
+		updateNotifications();
+		
+		updateTransitionsEnabled();
+		
+		for(TransitionEnabled transitionEnabled: currentTransitionsEnabled) {
+			TransitionSyncComponent transition = transitionEnabled.getTransition();
+			for(ReceivePort receivePort: transition.getReceivePorts()) {
+				receivePort.getComponentBottom().setIndexTransitionEnabled(transitionEnabled.getBottomIndex(receivePort));
+				
+				if(transition.guard()) {
+					allTransitionsEnabled.add(transitionEnabled);
+					transition.upAction();
+					if(transition.getSendPort() != null) transition.getSendPort().setSynced();
+				}
+			}
+		}
+	}
+	
+	private void updateTransitionsEnabled() {
 		for(AbstractTransition t: currentLocation.getOutgoingTransition()) {
 			TransitionSyncComponent transition = (TransitionSyncComponent) t; 
 			
-			for(ReceivePort receivePort: transition.getReceivePorts()) 
-				if(!receivePort.getSynced()) continue outerLoop;
-			
-			
-			// all the receive ports have been received for transition t
-			
-			
-			keysValues.add(new KeyValues(t, indexBottom));
-			
-			if(transition.guard()) {
-				transition.upAction();
-				if(transition.getSendPort() != null)
-					transition.getSendPort().setSynced(keysValues.size());
+			if(transition.getIndexReceivePort(currentNotifiedPort) == -1) continue;
+
+			if(isPartialEnable(transition)) {
+				updateTransitionsEnabled(transition);
+			}		
+		}
+	}
+	
+	
+	
+	private void updateTransitionsEnabled(TransitionSyncComponent transition) {
+		currentTransitionsEnabled = new LinkedList<TransitionEnabled>();
+		TransitionEnabled t = new TransitionEnabled(transition);
+		constructTransitionEnabled(transition, 0, t);
+	}
+	
+	
+	/**
+	 * 
+	 * @param transition
+	 * @param indexReceivePort
+	 * @param transitionEnabled
+	 */
+	private void constructTransitionEnabled(TransitionSyncComponent transition, 
+			int indexReceivePort, 
+			TransitionEnabled transitionEnabled) {
+		if(indexReceivePort == transition.getReceivePorts().length) {
+			currentTransitionsEnabled.add(transitionEnabled);
+			return; 
+		}
+				
+		ReceivePort rcvPort = transition.getReceivePorts()[indexReceivePort];
+		if(rcvPort.equals(currentNotifiedPort)) {
+			TransitionEnabled transitionEnabledTmp = new TransitionEnabled(transitionEnabled);
+			transitionEnabledTmp.getBottomIndices().add(rcvPort.getComponentBottom().getCurrentIndexNotified());
+			constructTransitionEnabled(transition, indexReceivePort + 1, transitionEnabledTmp);
+		}
+		else {
+			int countReceivedPort = notifications.get(rcvPort).size();
+
+			for(int i = 0; i < countReceivedPort; i++) {
+				TransitionEnabled transitionEnabledTmp = new TransitionEnabled(transitionEnabled);
+				transitionEnabledTmp.getBottomIndices().add(rcvPort.getComponentBottom().getCurrentIndexNotified());
+				constructTransitionEnabled(transition, indexReceivePort + 1, transitionEnabledTmp);
+				
 			}
 		}
+	}
+
+
+
+	
+	private boolean isPartialEnable(TransitionSyncComponent t) {
+		for(ReceivePort receivePort: t.getReceivePorts()) 
+			if(!receivePort.getSynced()) return false;
+		return true;
 	}
 
 	
@@ -117,11 +193,11 @@ public abstract class SyncComponent extends Component {
 	
 	
 	public int getIndexEnableTransition() {
-		int size = keysValues.size();
+		int size = currentTransitionsEnabled.size();
 		int i;
 		for(i = 0 ; i < size; i++) {
-			if(keysValues.get(i).getTransition().getSendPort() == null || 
-					keysValues.get(i).getTransition().getSendPort().getReceivePorts().size() == 0)
+			if(currentTransitionsEnabled.get(i).getTransition().getSendPort() == null || 
+					currentTransitionsEnabled.get(i).getTransition().getSendPort().getReceivePorts().size() == 0)
 				return i; 
 		}
 		return -1; 

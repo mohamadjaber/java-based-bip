@@ -1,45 +1,66 @@
 package ujf.verimag.bip.java.example1;
 
-import static org.junit.Assert.*;
+
+
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import ujf.verimag.bip.java.api.Compound;
 import ujf.verimag.bip.java.engine.EngineImpl;
 
+
 public class TestSorting2 extends Compound {
-	public TestSorting2() {
-		// Base Components
-		ArrayAtom comp1 = new ArrayAtom(this, 100);
-		ArrayAtom comp2 = new ArrayAtom(this, 100);
-		ArrayAtom comp3 = new ArrayAtom(this, 100);
-		ArrayAtom comp4 = new ArrayAtom(this, 100);
+	private int nbOfAtoms = 4; // should be equal 2^n (n >= 2)
+	private int sizeLocalArray = 2;
+	
+	public TestSorting2() {		
+		ArrayAtom[] baseComponents = new ArrayAtom[nbOfAtoms];
+		for(int i = 0; i < nbOfAtoms; i++) {
+			baseComponents[i] = new ArrayAtom(this, sizeLocalArray, i);
+		}
 
-		
-		// Sync Components
-		Exchange exchange1 = new Exchange(this);
-		Exchange exchange2 = new Exchange(this);
+		int nbLayerExchange = (int) (Math.log(nbOfAtoms)/ Math.log(2));
+		int nbLayerFinish = nbLayerExchange - 1; 
 
-		Finish finish1 = new Finish(this);
-		Finish finish2 = new Finish(this);
+				
+		int nbExchangePerLayer = nbOfAtoms/2;
+		Exchange[][] syncExchanges = new Exchange[ nbLayerExchange ][];
+		Finish[][] syncFinishes = new Finish[ nbLayerFinish ][];
+
+		for(int i = 0; i < nbLayerExchange; i++) {
+			syncExchanges[i] = new Exchange[nbExchangePerLayer];
+			if(i < nbLayerFinish)
+				syncFinishes[i] = new Finish[nbExchangePerLayer];
+
+			for(int j = 0; j < nbExchangePerLayer; j++) {
+				syncExchanges[i][j] = new Exchange(this);
+				if(i < nbLayerFinish)
+					syncFinishes[i][j] = new Finish(this);
+			}
+			nbExchangePerLayer /= 2;
+		}
+
+		for(int i = 0; i < nbOfAtoms/2; i++) {
+			syncExchanges[0][i].p1.connect(baseComponents[2*i].work);
+			syncExchanges[0][i].p2.connect(baseComponents[2*i + 1].work);
+			syncFinishes[0][i].p1.connect(baseComponents[2*i].work);
+			syncFinishes[0][i].p2.connect(baseComponents[2*i + 1].work);
+		}
+
+		nbExchangePerLayer = nbOfAtoms/4;
+		for(int i = 1; i < nbLayerExchange; i++) {
+			for(int j = 0; j < nbExchangePerLayer; j++) {				
+				syncExchanges[i][j].p1.connect(syncFinishes[i-1][j*2].work);
+				syncExchanges[i][j].p2.connect(syncFinishes[i-1][j*2 + 1].work);
+				if(i < nbLayerFinish) {
+					syncFinishes[i][j].p1.connect(syncFinishes[i-1][j*2].work);
+					syncFinishes[i][j].p2.connect(syncFinishes[i-1][j*2 + 1].work);	
+				}
+			}
+			nbExchangePerLayer /= 2;
+		}
 		
-		Exchange top = new Exchange(this);
-		
-		// Connections
-		exchange1.p1.connect(comp1.work);
-		exchange1.p2.connect(comp2.work);
-		
-		exchange2.p1.connect(comp3.work);
-		exchange2.p2.connect(comp4.work);
-		
-		finish1.p1.connect(comp1.work);
-		finish1.p2.connect(comp2.work);
-		
-		finish2.p1.connect(comp3.work);
-		finish2.p2.connect(comp4.work);
-		
-		top.p1.connect(finish1.work);
-		top.p2.connect(finish2.work);
 	}
 	
 	@Test
@@ -49,4 +70,5 @@ public class TestSorting2 extends Compound {
 		engine.getThread().join();
 		assertTrue(true);
 	}
+	
 }

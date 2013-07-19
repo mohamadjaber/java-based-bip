@@ -15,6 +15,7 @@ public class ArrayAtom extends BaseComponent {
 	private int[] array; 
 	private int indexMin, indexMax;
 	private int size; 
+	private final int identifier;
 	
 	// Data may attached to ports
 	private WrapInt min = new WrapInt();
@@ -26,10 +27,11 @@ public class ArrayAtom extends BaseComponent {
 	// Port
 	public SendPort work = new SendPort(min, max);
 	
-	public ArrayAtom(Compound compound, int size) {
+	public ArrayAtom(Compound compound, int size, int id) {
 		super(compound);
 		setInitial(l0);
 		this.size = size; 
+		this.identifier = id;
 		initialization();
 
 		addTransition( new Transition(l0, l0, work) {
@@ -38,7 +40,7 @@ public class ArrayAtom extends BaseComponent {
 				array[indexMin] = min.value;
 				array[indexMax] = max.value;
 				updateMinMax();	
-				System.out.println(this + " : " + Arrays.toString(array));
+				System.out.println(identifier + " : " + Arrays.toString(array));
 			}
 		});
 	}
