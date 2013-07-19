@@ -15,10 +15,10 @@ public class TestSorting3 extends Compound {
 	public TestSorting3() {
 		final int size = 10; 
 		// Base Components
-		ArrayAtom comp1 = new ArrayAtom(this, size, 1);
-		ArrayAtom comp2 = new ArrayAtom(this, size, 2);
-		ArrayAtom comp3 = new ArrayAtom(this, size, 3);
-		ArrayAtom comp4 = new ArrayAtom(this, size, 4);
+		ArrayAtom comp1 = new ArrayAtom(this, size, 0);
+		ArrayAtom comp2 = new ArrayAtom(this, size, 1);
+		ArrayAtom comp3 = new ArrayAtom(this, size, 2);
+		ArrayAtom comp4 = new ArrayAtom(this, size, 3);
 
 		
 		// Sync Components
