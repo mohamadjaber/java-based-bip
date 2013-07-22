@@ -71,7 +71,7 @@ public abstract class SyncComponent extends Component {
 					transitionEnabled.disable();
 					if(transition.getSendPort() != null) {
 						SyncComponent upSyncComponent = (SyncComponent) transition.getSendPort().getComponent();
-						upSyncComponent.upReset(i);
+						upSyncComponent.upReset(this, i);
 					}
 				}		
 			}
@@ -79,23 +79,28 @@ public abstract class SyncComponent extends Component {
 	}
 	
 	
+	
+	
 	/**
 	 * A reset that comes from a sync component
 	 * @param indexExecutedBottom
 	 */
-	public void upReset(int indexExecutedBottom) {
+	public void upReset(SyncComponent component, int indexExecutedBottom) {
 		for(int i = 0; i < allTransitionsEnabled.size(); i++) {
-			if(i != indexExecutedBottom) {
-				TransitionEnabled transitionEnabled = allTransitionsEnabled.get(i);
-				transitionEnabled.disable();
-				TransitionSyncComponent transition = transitionEnabled.getTransition();
-				if(transition.getSendPort() != null) {
-					SyncComponent upSyncComponent = (SyncComponent) transition.getSendPort().getComponent();
-					upSyncComponent.upReset(indexToExecute);
-				}
+			TransitionEnabled transitionEnabled = allTransitionsEnabled.get(i);
+			TransitionSyncComponent transition = transitionEnabled.getTransition();	
+			for(ReceivePort rcvPort: transition.getReceivePorts()) {
+				if(rcvPort.getComponentBottom().equals(component) && transitionEnabled.getBottomIndex(rcvPort) != indexExecutedBottom) {
+					transitionEnabled.disable();
+					if(transition.getSendPort() != null) {
+						SyncComponent upSyncComponent = (SyncComponent) transition.getSendPort().getComponent();
+						upSyncComponent.upReset(this, i);
+					}
+				}		
 			}
 		}
 	}
+	
 	
 	
 	
