@@ -11,7 +11,7 @@ import ujf.verimag.bip.java.api.Component;
  *
  * @param <T>
  */
-public class WrapType<T> { 
+public class WrapType<T extends Object> { 
 	
 	private Component component; 
 	private T originalValue;
@@ -55,8 +55,9 @@ public class WrapType<T> {
 	public T getValue() {
 		if(component instanceof BaseComponent)
 			return originalValue;
-		
+				
 		expands();
+		
 		return copyValues.get(component.getIndexTransitionEnabled());
 	}
 	
@@ -68,6 +69,10 @@ public class WrapType<T> {
 		}
 		expands();
 		copyValues.set(component.getIndexTransitionEnabled(), value); 
+	}
+	
+	public void reset() {
+		copyValues.clear();
 	}
 
 }

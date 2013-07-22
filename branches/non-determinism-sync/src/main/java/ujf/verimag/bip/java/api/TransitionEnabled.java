@@ -9,16 +9,19 @@ import java.util.Arrays;
 public class TransitionEnabled {
 	private TransitionSyncComponent transition;
 	private int[] bottomIndices; 
+	private boolean isEnabled;
 	
 	public TransitionEnabled(TransitionSyncComponent t) {
 		transition = t;
 		bottomIndices = new int[transition.getReceivePorts().length];
+		isEnabled = true; 
 	}
 	
 	
 	public TransitionEnabled(TransitionEnabled te) {
 		this.transition = te.transition; 
-		bottomIndices = Arrays.copyOf(te.bottomIndices, te.bottomIndices.length);
+		this.bottomIndices = Arrays.copyOf(te.bottomIndices, te.bottomIndices.length);
+		this.isEnabled = te.isEnabled; 
 	}
 
 	@Override
@@ -50,8 +53,16 @@ public class TransitionEnabled {
 	}
 	
 	public void setBottomIndex(int index, int value) {
-		assert(index > 0 && index < bottomIndices.length);
+		assert(index >= 0 && index < bottomIndices.length);
 		bottomIndices[index] = value; 
+	}
+	
+	public void disable() {
+		isEnabled = false; 
+	}
+	
+	public boolean isEnabled() {
+		return isEnabled; 
 	}
 
 	

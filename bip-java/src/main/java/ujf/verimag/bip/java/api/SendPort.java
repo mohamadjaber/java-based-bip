@@ -53,9 +53,10 @@ public class SendPort  {
 	 */
 	private void reset() {
 		for(ReceivePort receivePort: receivePorts) {
-			TransitionSyncComponent transition = receivePort.getSyncComponent().getCurrentTransition();
+			SyncComponent syncComponent = receivePort.getSyncComponent();
+			TransitionSyncComponent transition = syncComponent.getCurrentTransition();
 			if(transition != null && Arrays.asList(transition.getReceivePorts()).contains(receivePort)) {
-				receivePort.getSyncComponent().reset();
+				syncComponent.reset();
 				transition.getSendPort().reset();
 			}
 		}

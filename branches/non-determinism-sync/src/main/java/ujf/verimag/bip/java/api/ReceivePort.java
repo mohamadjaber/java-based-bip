@@ -2,7 +2,7 @@ package ujf.verimag.bip.java.api;
 
 import ujf.verimag.bip.java.types.WrapType;
 
-public class ReceivePort {
+public  class ReceivePort {
 	
 	private SyncComponent component; 
 	private SendPort sendPort; 
@@ -12,31 +12,30 @@ public class ReceivePort {
 	public ReceivePort(SyncComponent component) {
 		this.component = component; 
 		this.component.getReceivePort().add(this);
+		synced = false; 
 	}
 	
 	public void connect(SendPort sendPort) {
 		this.sendPort = sendPort;
 		component.getCompound().getConnections().put(this, sendPort);
 		sendPort.getReceivePorts().add(this);
-		
-		synced = false; 
 	}
 	
-	public SendPort getSendPort() {
+	public synchronized SendPort getSendPort() {
 		return sendPort;
 	}
 	
-	public void setSynced() {
+	public synchronized void setSynced() {		
 		synced = true; 
-		component.updateSynced(this);
+		component.updateSynced(this, component.getCurrentIndexNotified());
 	}
 	
 	public void reset() {
 		synced = false; 
 	}
+
 	
-	
-	public WrapType<Object> getVariable(int index) {
+	public synchronized WrapType<?> getVariable(int index) {
 		return sendPort.getVariable(index);
 	} 
 

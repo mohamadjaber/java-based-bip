@@ -16,8 +16,7 @@ public abstract class BaseComponent extends Component implements Runnable {
 	private final Semaphore semaphore = new Semaphore(0);
 	
 	private SendPort portFired; 
-	
-	
+
 	
 	public BaseComponent(Compound compound) {
 		super(compound);
@@ -49,8 +48,7 @@ public abstract class BaseComponent extends Component implements Runnable {
 		transitions.add(trans);
 	}
 	
-
-	
+		
 	public void notifyEngine() {
 		setSynced();
 		engine.notified();

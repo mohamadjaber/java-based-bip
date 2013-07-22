@@ -10,16 +10,16 @@ import ujf.verimag.bip.java.types.WrapType;
 
 public class SendPort  {
 	
-	private List<WrapType<Object>> variables;
+	private List<WrapType<?>> variables;
 	private Component component;
 	
 	private Set<ReceivePort> receivePorts;
 	
-	public SendPort(Component component, WrapType<Object>... vars) {
+	public SendPort(Component component, WrapType<?>... vars) {
 		this.component = component; 
 		this.component.addSendPort(this);
-		variables = new ArrayList<WrapType<Object>>();
-		for(WrapType<Object> o: vars) {
+		variables = new ArrayList<WrapType<?>>();
+		for(WrapType<?> o: vars) {
 			this.variables.add(o);
 		}
 		
@@ -27,14 +27,30 @@ public class SendPort  {
 	}
 	
 	
-	public void setSynced() {
+	public synchronized void setSynced() {
 		for(ReceivePort rcvPort: receivePorts) {
 			rcvPort.setSynced();
 		}
 	}
+
 	
+	/**
+	 * 
+	 */
+	public void conflictReset() {
+		assert(component instanceof BaseComponent);
+		BaseComponent baseComponent = (BaseComponent) component; 
+		for(AbstractTransition t : baseComponent.getCurrentLocation().getOutgoingTransition()) {
+			SendPort sendPort = t.getSendPort();
+			for(ReceivePort rcvPort: sendPort.receivePorts) {
+				rcvPort.getSyncComponent().upReset(sendPort);
+			}
+		}
+	}
+	
+
 		
-	public WrapType<Object> getVariable(int index) {
+	public WrapType<?> getVariable(int index) {
 		return variables.get(index);
 	}
 	
