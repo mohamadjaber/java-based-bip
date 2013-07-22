@@ -73,7 +73,7 @@ premises of an SOS rule.
     \pout_i, \goesto{})}{i \in [1,n]}$ is given by a \compmodel{}
   $\compose[S] \bydef{=} (Q, \pin, \pout, \goesto{})$, where
   \begin{equation}
-    \label{eq:composition:ports}
+    \label{eq:composition:parts}
     Q = \prod_{i=1}^n Q_i\,,
     \hspace{1cm}
     \pin = \bigcup_{i=1}^n \pin_i \setminus \bigcup_{i=1}^n \pout_i\,,
@@ -146,7 +146,7 @@ either a behaviour or a conversation.
   words, there is an edge from $T_i$ to $T_j$ if some of the requests of
   the former can be granted by the latter.
 
-  If $\topo{S}$ is a directed acyclic graph (DAG), the $S$ is a
+  If $\topo{S}$ is a directed acyclic graph (DAG) then $S$ is a
   \emph{flow-system}.  If $\topo{S}$ is disconnected, \ie $E = \emptyset$,
   the system is \emph{independent}.
 \end{definition}
@@ -179,12 +179,12 @@ propagated back to behaviours.  Below, we present this in a formal manner.
 
 \begin{definition}[\compmodel{} with data]
   \label{defn:data}
-  A \emph{\compmodel{} with data} is a tuple $T=(Q, \local{\data}, \data,
-  \pin, \pout,$ \mbox{$\goesto{}$,} $\guard, \up, \down)$, where
+  A \emph{\compmodel{} with data} is a tuple $T=(Q, \pin, \pout, \goesto{},
+  \local{\data}, \data, \guard, \up, \down)$, where
   \begin{itemize}
   \item $(Q, \pin, \pout, \goesto{})$ is a \compmodel{},
   \item $\local{\data}$ is the \emph{local data domain},
-  \item $\data = (\data[p])_{p \in P}$ is a family of \emph{data domains
+  \item $\data = \setdef{\data[p]}{p \in P}$ is a set of \emph{data domains
     associated to ports} of the system,
   \item $\guard$ is the \emph{guard} mapping associating to each transition
     $t = q \goesto{a} q'$ a boolean guard $\guard(t): \local{\data} \times
@@ -217,8 +217,8 @@ definition.
   The operational semantics of a \compmodel{} with data $T = (Q,
   \local{\data}, \data, \pin, \pout, \goesto{}, \guard, \up, \down)$ is
   given by an LTS $\undata{T} = (Q \times \local{\data}, 2^P \times
-  \data[2]$, \mbox{$\goesto{})$}, where a state $(q, v)$ consists of a
-  control state of $T$ and the valuation $v \in \local{\data}$;
+  \data[P] \times \data[P]$, \mbox{$\goesto{})$}, where a state $(q, v)$
+  consists of a control state of $T$ and the value $v \in \local{\data}$;
   $\goesto{}$ is the minimal transition relation inductively defined by the
   following rule:
   \begin{equation}
@@ -245,12 +245,12 @@ definition.
     }\,,
   \end{equation}
   where $\local{\up}$ and $\request{\up}$ are the two components of the
-  $\up$ function; $\portdata{v}$ and $\portdata{\tilde{v}}$ are \emph{data
-  valuations associated to ports at the upward and downward data transfer
-  phases} respectively.
+  $\up$ function; $\portdata{v}, \portdata{\tilde{v}} \in \data[P]$ are
+  \emph{data values associated to ports at the upward and downward data
+    transfer phases} respectively.
 \end{definition}
 
-For the valuations $\portdata{v}$ and $\portdata{\tilde{v}}$, in
+For the values $\portdata{v}$ and $\portdata{\tilde{v}}$, in
 \eq{data:semantics}, it is important to notice the difference with the
 input/output dichotomy.  Indeed, the component \emph{input} is the pair
 $(\grant{\portdata{v}}, \request{\portdata{\tilde{v}}})$, whereas its
@@ -269,32 +269,79 @@ the second premise.
 %% request ports in the components one level down in the topology and
 %% vice-versa, in the downwards transfer phase.
 
-\begin{definition}[System operational semantics with data]
+\begin{definition}[Flow-System operational semantics with data]
   \label{defn:data:composition}
-  Let $S = \setdef{T_i = (Q_i, \local{\data}_i, \data_i, \pin_i,
-    \pout_i, \goesto{}, \guard_i, \up_i, \down_i)}{i \in [1,n]}$ be a
-  set of \compmodel{} with data, such that the underlying \compmodel{}
-  form a flow-system (\defn{topology}).  We call $S$ a
-  \emph{flow-system with data} if the data domains agree on ports
-  belonging to several components:
+  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{}, \local{\data}_i,
+    \data_i, \guard_i, \up_i, \down_i)}{i \in [1,n]}$ be a set of
+  \compmodel{} with data, such that the underlying \compmodel{} form a
+  flow-system (\defn{topology}).  We call $S$ a \emph{data-coherent
+    flow-system} if the data domains agree on ports belonging to several
+  components:
   \begin{equation}
     \label{eq:data:coherency}
     \forall p \in P,\ \forall i,j \in [1,n],\ 
     \left(
-    p \in P_i \cap P_j \implies \data[p]_i = \data[p]_j
+    p \in \pout_i \cap \pin_j \implies \data[p]_i = \data[p]_j
     \right)\,,
   \end{equation}
   where $P \bydef{=} \bigcup_{i=1}^n P_i$.
 
+  The operational semantics of a data-coherent flow-system with data is
+  given by an LTS $\undata{S} = (Q \times \local{\data}, 2^P \times
+  \data[P] \times \data[P], \goesto{})$, where
+  \begin{equation}
+    \label{eq:data:parts}
+    Q = \prod_{i=1}^n Q_i\,,
+    \hspace{1cm}
+    \local{\data} = \prod_{i=1}^n \local{\data}_i\,,
+    \hspace{1cm}
+    \data = \bigcup_{i=1}^n \data_i\,
+  \end{equation}
+  and \goesto{} is the minimal transition relation inductively defined by
+  the derivation rule
   \begin{equation}
     \label{eq:data:composition}
-    \derrule{
-      
+    \renewcommand{\arraystretch}{1.5}
+    \derrule[3]{
+      a \subseteq P
+      &
+      (q_i,v_i) 
+      \goesto[\portdata{v}_i:\portdata{\tilde{v}}_i]{a \cap P_i}
+      (q_i', v_i')
+      &
+      \forall p \in \pout_i \cap \pin,
+      \begin{cases}
+      \forall j \in [1,n],\ p \in \pin_j \Rightarrow 
+      \portdata{v}_i^p = \portdata{v}_j^p
+      \\
+      \exists j \in [1,n]: p \in \pin_j \land 
+      \portdata{\tilde{v}}^p_i = \portdata{\tilde{v}}^p_j
+      \end{cases}
+      %% \forall i \neq j, \Big(
+      %% p \in \request{P_i} \cap \grant{P_j} 
+      %% \implies
+      %% \portdata{v}_i^p = \portdata{v}_j^p 
+      %% \land
+      %% \portdata{\tilde{v}}^p_i = \portdata{\tilde{v}}^p_j 
+      %% \Big)
     }{      
-      \dots
-    }
+      (q_1\dots q_n, v_1\dots v_n)
+      \goesto[]{a}
+      (q_1'\dots q_n', v_1'\dots v_n')
+    }\,,
   \end{equation}
+  where, the second premise is a transition in $\undata{T_i}$.
 \end{definition}
+
+It is important to notice that the third premise in \eq{data:composition}
+states that, during the upward transfer phase, the data is propagated in a
+{\em broadcast} manner, \ie the same value is transferred from a request
+instance of a port to {\em all} corresponding grant instances; on the
+contrary, during the downward transfer phase, only one of the grant values
+gets assigned to the corresponding request value.  The intuition behind
+this choice is based on the service analogy: one component can request the
+same service from several components providing it, the latter make their
+proposals, whereof only one is actually chosen.
 
 % *********************************************************************
 
@@ -322,3 +369,4 @@ equivalent.
 
 Non-deterministic conversations with memory are strictly more expressive
 than deterministic conversations with memory
+

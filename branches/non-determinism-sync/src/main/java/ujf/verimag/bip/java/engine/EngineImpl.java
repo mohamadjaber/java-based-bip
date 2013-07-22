@@ -1,7 +1,7 @@
 package ujf.verimag.bip.java.engine;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -21,6 +21,11 @@ public class EngineImpl implements Engine {
 	
 	private Compound compound; 
 	
+	private List<SyncComponent> topEnableSyncComponent;
+
+	private List<SyncComponent> topEnableSyncComponentSelected;
+
+	
 	
 	public EngineImpl(Compound compound) {
 		this.compound = compound; 
@@ -28,6 +33,10 @@ public class EngineImpl implements Engine {
 		semaphore = new Semaphore(0);
 		
 		componentEnablePort = new HashMap<BaseComponent, SendPort>();
+		
+		topEnableSyncComponent = new LinkedList<SyncComponent>();
+		topEnableSyncComponentSelected = new LinkedList<SyncComponent>();
+
 		
 		for(BaseComponent comp: this.compound.getBaseComponents()) {
 			componentEnablePort.put(comp, null);
@@ -55,30 +64,43 @@ public class EngineImpl implements Engine {
 		}
 	}
 
-	@Override
+	/**
+	 * @Override
+	 * 
+	 */
 	public void compute() {
-		List<SyncComponent> topEnableSyncComponent = getTopEnableSyncComponent(); 
-		if(topEnableSyncComponent.size() == 0) {
+		while(updateTopEnableSyncComponent()) {
+			int random = (int) (Math.random() * topEnableSyncComponent.size());
+			SyncComponent currentSelected = topEnableSyncComponent.get(random);
+			currentSelected.propagateEnablePorts(componentEnablePort, currentSelected.getRandomTopTransitionEnable());
+			topEnableSyncComponentSelected.add(currentSelected);
+		}
+		
+		
+		if(topEnableSyncComponentSelected.size() == 0) {
 			for(BaseComponent component: compound.getBaseComponents())
 				component.getThread().interrupt();
 			thread.interrupt();
 		}
-		else {
-			int random = (int) (Math.random() * topEnableSyncComponent.size());
-			SyncComponent topEnable = topEnableSyncComponent.get(random);
-			topEnable.propagateEnablePorts(componentEnablePort);
-			compound.resetSyncComponents();
-		}
+		
+		compound.resetSyncComponents();
+		topEnableSyncComponentSelected.clear();
 	}
 	
-	private List<SyncComponent> getTopEnableSyncComponent() {
-		ArrayList<SyncComponent> topEnableSyncComponent = new ArrayList<SyncComponent>();
+	/**
+	 * This method updates the top 
+	 * @return
+	 */
+	private boolean updateTopEnableSyncComponent() {
+		topEnableSyncComponent.clear();
 		for(SyncComponent syncComponent: compound.getSyncComponents()) {
-			if(syncComponent.isTop() && syncComponent.isEnable())
+			if(!topEnableSyncComponentSelected.contains(syncComponent) && syncComponent.isTopEnabled()) {
 				topEnableSyncComponent.add(syncComponent);
+			}
 		}
-		return topEnableSyncComponent;
+		return topEnableSyncComponent.size() > 0;
 	}
+	
 	
 	/**
 	 * @Overrride
