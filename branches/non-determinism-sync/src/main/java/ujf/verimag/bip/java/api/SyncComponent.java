@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import ujf.verimag.bip.java.types.WrapType;
 
@@ -13,7 +14,6 @@ import ujf.verimag.bip.java.types.WrapType;
 public abstract class SyncComponent extends Component {
 	
 	private Set<ReceivePort> receivePorts;
-	
 
 	private Map<ReceivePort, List<Integer>> notifications; 
 	
@@ -25,8 +25,10 @@ public abstract class SyncComponent extends Component {
 	
 	private List<TransitionEnabled> topTransitionsEnabled;
 
+	private Semaphore semaphore;
 	
 	public SyncComponent(Compound compound) {
+		
 		super(compound);
 		receivePorts = new HashSet<ReceivePort>();
 		compound.getSyncComponents().add(this);
@@ -34,6 +36,7 @@ public abstract class SyncComponent extends Component {
 		indexToExecute = -1;
 		currentBottomIndex = -1;
 		topTransitionsEnabled = new LinkedList<TransitionEnabled>();
+		semaphore = new Semaphore(1);
 	}
 	
 	public Set<ReceivePort> getReceivePort() {
@@ -121,24 +124,46 @@ public abstract class SyncComponent extends Component {
 	}
 	
 
-	public synchronized void updateSynced(ReceivePort rcvPort, int indexBottom) {
+	public void updateSynced(ReceivePort rcvPort, int indexBottom) {	
+		acquireSemaphore();
 		currentNotifiedPort = rcvPort;
 		currentBottomIndex = indexBottom; 
-				
+			
 		updateNotifications();
-				
+
 		currentTransitionsEnabled.clear();
+		
 		updateTransitionsEnabled();
-				
+		
+		Map<SendPort, Integer> upSendPortIndex = new HashMap<SendPort, Integer>();
+		
 		for(TransitionEnabled transitionEnabled: currentTransitionsEnabled) {
 			TransitionSyncComponent transition = transitionEnabled.getTransition();
+			
+			transitionEnabled.acquireBottomSemaphores();
 			transitionEnabled.updateBottomIndices();
+			
 			if(transition.guard()) {
 				allTransitionsEnabled.add(transitionEnabled);
+				
+				int currentIndex = allTransitionsEnabled.size() - 1;
+
+				setIndexTransitionEnabled(currentIndex);
 				transition.upAction();
-				if(transition.getSendPort() != null) transition.getSendPort().setSynced();
+				transitionEnabled.releaseBottomSemaphores();
+
+				if(transition.getSendPort() != null) {
+					upSendPortIndex.put(transition.getSendPort(), currentIndex);
+				}			
+			}
+			else {
+				transitionEnabled.releaseBottomSemaphores();
 			}
 		}
+		releaseSemaphore();
+		
+		for(SendPort sendPort: upSendPortIndex.keySet())
+			sendPort.setSynced(upSendPortIndex.get(sendPort));
 	}
 	
 	private void updateTransitionsEnabled() {
@@ -154,7 +179,6 @@ public abstract class SyncComponent extends Component {
 	}
 	
 	
-	
 	private boolean isPartialEnable(TransitionSyncComponent transition) {		
 		for(ReceivePort receivePort: transition.getReceivePorts()) 
 			if(!notifications.containsKey(receivePort)) return false;
@@ -164,7 +188,7 @@ public abstract class SyncComponent extends Component {
 	
 	
 	private void updateTransitionsEnabled(TransitionSyncComponent transition) {
-		TransitionEnabled t = new TransitionEnabled(transition);
+		TransitionEnabled t = new TransitionEnabled(transition, this);
 		constructTransitionEnabled(transition, 0, t);
 	}
 	
@@ -223,16 +247,18 @@ public abstract class SyncComponent extends Component {
 	
 	public void propagateEnablePorts(Map<BaseComponent, SendPort> componentEnablePort, int index) {
 	
-		if(!checkIndex(index))
-			return; // index already executed
-			
+		if(!checkIndex(index)) return; // index already executed
+	
 		indexToExecute = index; 
 		TransitionEnabled transitionEnabled = allTransitionsEnabled.get(indexToExecute);
 		TransitionSyncComponent transition = transitionEnabled.getTransition();
 		
+		setIndexTransitionEnabled(indexToExecute);
 		transitionEnabled.updateBottomIndices();	
 		updateOriginalValues();
 		transition.action();
+		updateOriginalValues();
+
 		setCurrentLocation(transition.getDestination());
 		
 		ReceivePort[] receivePorts = transition.getReceivePorts();
@@ -247,8 +273,12 @@ public abstract class SyncComponent extends Component {
 				 *  The connection should be tree at run-time. 
 				 *  otherwise semantic error, a base component receives to execute multiple ports.
 				 */
-				if(componentEnablePort.get(component) != null &&
-						componentEnablePort.get(component).equals(sendPort)) {
+				if(componentEnablePort.get(component) != null) { // conflict detection
+					
+					// Allows conflict on the same port
+					if(componentEnablePort.get(component).equals(sendPort)) return; 
+					
+					System.out.println(sendPort + " <--> " + componentEnablePort.get(component));
 					System.out.println("DAG detection - Component" + component + " has been notified two times");
 					System.exit(0);
 				}
@@ -282,11 +312,20 @@ public abstract class SyncComponent extends Component {
 		}
 	}
 	
+	public void acquireSemaphore() {
+		try {
+			semaphore.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
+	public void releaseSemaphore() {
+		semaphore.release();
+	}
 	
 
-	
 
-	
 
 }

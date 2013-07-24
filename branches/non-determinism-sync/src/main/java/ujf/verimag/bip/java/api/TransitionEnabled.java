@@ -1,6 +1,8 @@
 package ujf.verimag.bip.java.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 
@@ -10,18 +12,45 @@ public class TransitionEnabled {
 	private TransitionSyncComponent transition;
 	private int[] bottomIndices; 
 	private boolean isEnabled;
+	private SyncComponent syncComponent;
 	
-	public TransitionEnabled(TransitionSyncComponent t) {
+	private int size; 
+	private List<SyncComponent>bottomSyncComponents;
+	
+	public TransitionEnabled(TransitionSyncComponent t, SyncComponent syncComponent) {
 		transition = t;
-		bottomIndices = new int[transition.getReceivePorts().length];
+		size = transition.getReceivePorts().length;
+		bottomIndices = new int[size];
+		bottomSyncComponents = new ArrayList<SyncComponent>();
 		isEnabled = true; 
+		this.syncComponent = syncComponent; 
+		setBottomSyncComponents();
 	}
 	
 	
+	private void setBottomSyncComponents() {
+		Compound compound = syncComponent.getCompound();
+		for(SyncComponent syncComponent: compound.getSyncComponents()) {
+			if(transition.getReceivePorts().length == bottomSyncComponents.size()) return;
+			
+			for(ReceivePort rcvPort: transition.getReceivePorts()) {
+				if(rcvPort.getSendPort().getComponent().equals(syncComponent)) {
+					bottomSyncComponents.add(syncComponent);
+					break;
+				}
+			}
+		
+		}
+	}
+
+
 	public TransitionEnabled(TransitionEnabled te) {
 		this.transition = te.transition; 
+		this.size = te.size; 
 		this.bottomIndices = Arrays.copyOf(te.bottomIndices, te.bottomIndices.length);
+		this.bottomSyncComponents = new ArrayList<SyncComponent>(te.bottomSyncComponents);
 		this.isEnabled = te.isEnabled; 
+		this.syncComponent = te.syncComponent;
 	}
 
 	@Override
@@ -36,8 +65,8 @@ public class TransitionEnabled {
 	}
 	
 	
-	public void updateBottomIndices() {
-		for(int i = 0; i < transition.getReceivePorts().length; i++) {
+	public void updateBottomIndices() {		
+		for(int i = 0; i < size; i++) {
 			ReceivePort rcvPort = transition.getReceivePorts()[i];
 			Component bottomComponent = rcvPort.getSendPort().getComponent();
 			if(bottomComponent instanceof SyncComponent) {
@@ -70,5 +99,25 @@ public class TransitionEnabled {
 		return transition;
 	}
 	
+	public void acquireBottomSemaphores() {
+		// acquire semaphore in order to avoid deadlock. 
+		for(SyncComponent syncComponent: bottomSyncComponents) {
+			syncComponent.acquireSemaphore();
+		}
+	}
+	
+	public void releaseBottomSemaphores() {
+		for(SyncComponent syncComponent: bottomSyncComponents) {
+			syncComponent.releaseSemaphore();
+		}
+	}
+	
+	
+	public String toString() {
+		String str = transition + ":  ";
+		for(int i = 0; i < bottomIndices.length; i++)
+			str += bottomIndices[i] + " - ";
+		return str;
+	}
 	
 }

@@ -9,8 +9,8 @@ import ujf.verimag.bip.java.engine.EngineImpl;
 
 public class TestSorting4 extends Compound {
 	
-	private int nbOfAtoms = 4; // should be equal 2^n (n >= 2)
-	private int sizeLocalArray = 5;
+	private int nbOfAtoms = Configuration.nbOfAtoms; // should be equal 2^n (n >= 2)
+	private int sizeLocalArray = 2;
 	
 	public TestSorting4() {		
 		ArrayAtom[] baseComponents = new ArrayAtom[nbOfAtoms];

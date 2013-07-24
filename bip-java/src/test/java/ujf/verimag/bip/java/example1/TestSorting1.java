@@ -16,10 +16,10 @@ public class TestSorting1  extends Compound {
 		final int size = 5;
 		assert size > 2;
 		// Base Components
-		ArrayAtom comp1 = new ArrayAtom(this, size, 1);
-		ArrayAtom comp2 = new ArrayAtom(this, size, 2);
-		ArrayAtom comp3 = new ArrayAtom(this, size, 3);
-		ArrayAtom comp4 = new ArrayAtom(this, size, 4);
+		ArrayAtom comp1 = new ArrayAtom(this, size, 0);
+		ArrayAtom comp2 = new ArrayAtom(this, size, 1);
+		ArrayAtom comp3 = new ArrayAtom(this, size, 2);
+		ArrayAtom comp4 = new ArrayAtom(this, size, 3);
 
 		
 		// Sync Components
@@ -47,6 +47,7 @@ public class TestSorting1  extends Compound {
 		top.p1.connect(finish1.work);
 		top.p2.connect(finish2.work);
 	}
+
 
 	
 	@Test

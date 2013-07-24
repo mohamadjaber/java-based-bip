@@ -11,7 +11,6 @@ public class Compound {
 
 	private Map<ReceivePort, SendPort> connections;
 	
-
 	public Compound() {	
 		baseComponents = new HashSet<BaseComponent>();
 		syncComponents = new HashSet<SyncComponent>();
