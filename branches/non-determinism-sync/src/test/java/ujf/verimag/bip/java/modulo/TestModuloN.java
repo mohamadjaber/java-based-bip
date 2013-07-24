@@ -8,7 +8,7 @@ import ujf.verimag.bip.java.api.Compound;
 import ujf.verimag.bip.java.engine.EngineImpl;
 
 public class TestModuloN extends Compound {
-	private int nbLevel = 3; // nbLevel = n => modulo 2^n
+	private int nbLevel = 10; // nbLevel = n => modulo 2^n
 	
 	public TestModuloN() {
 		// Base Components

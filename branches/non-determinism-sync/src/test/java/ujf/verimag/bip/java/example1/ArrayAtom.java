@@ -49,7 +49,7 @@ public class ArrayAtom extends BaseComponent {
 		array = new int[size];
 		
 		for(int i = 0; i < array.length; i++)
-			array[i] = (int) (Math.random() * 100);	
+			array[i] = size * (Configuration.nbOfAtoms - (identifier+1)) + ((int) (Math.random() * size));	
 		updateMinMax();
 	}
 

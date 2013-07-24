@@ -50,9 +50,6 @@ public class ArrayAtom extends BaseComponent {
 		
 		for(int i = 0; i < array.length; i++)
 			array[i] = size * (Configuration.nbOfAtoms - (identifier+1)) + ((int) (Math.random() * size));	
-		
-		System.out.println("initial " + identifier + " : " + Arrays.toString(array));
-
 		updateMinMax();
 	}
 
