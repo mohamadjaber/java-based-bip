@@ -34,8 +34,6 @@ public class TestPots extends Compound {
 			voiceAgregation1.receivers[i].connect(clients[i].voice);
 			voiceAgregation2.receivers[i].connect(clients[i].voice);
 		}
-		
-		
 		callerCalleeSync.callee.connect(calleeAgregation.callee);
 		callerCalleeSync.caller.connect(callerAgregation.caller);
 			

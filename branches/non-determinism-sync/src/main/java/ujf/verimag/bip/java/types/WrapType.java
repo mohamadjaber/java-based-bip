@@ -49,8 +49,6 @@ public class WrapType<T extends Object> {
 		int index = component.getIndexTransitionEnabled();
 		if(copyValues.containsKey(index))
 			return copyValues.get(index);		
-		
-	//	System.out.println("OOOPS " + index + "  size:" + copyValues.size());
 		return originalValue;
 	}
 	
@@ -61,9 +59,6 @@ public class WrapType<T extends Object> {
 			originalValue = value;
 			return;
 		}
-		
-	//	if(copyValues.containsKey(component.getIndexTransitionEnabled()))
-	//			System.out.println("ooops override");
 		copyValues.put(component.getIndexTransitionEnabled(), value);
 	}
 	

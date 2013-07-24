@@ -166,44 +166,6 @@ public abstract class SyncComponent extends Component {
 			sendPort.setSynced(upSendPortIndex.get(sendPort));
 	}
 	
-	
-	public void updateSynced1(ReceivePort rcvPort, int indexBottom) {	
-		acquireSemaphore();
-		currentNotifiedPort = rcvPort;
-		currentBottomIndex = indexBottom; 
-			
-		updateNotifications();
-
-		currentTransitionsEnabled.clear();
-		
-		updateTransitionsEnabled();
-		
-		for(TransitionEnabled transitionEnabled: currentTransitionsEnabled) {
-			TransitionSyncComponent transition = transitionEnabled.getTransition();
-			
-			transitionEnabled.acquireBottomSemaphores();
-			transitionEnabled.updateBottomIndices();
-			
-			if(transition.guard()) {
-				allTransitionsEnabled.add(transitionEnabled);
-				
-				int currentIndex = allTransitionsEnabled.size() - 1;
-
-				setIndexTransitionEnabled(currentIndex);
-				transition.upAction();
-				transitionEnabled.releaseBottomSemaphores();
-
-				if(transition.getSendPort() != null) 	
-					transition.getSendPort().setSynced(currentIndex);
-			
-			}
-			else {
-				transitionEnabled.releaseBottomSemaphores();
-			}
-		}
-		releaseSemaphore();
-	}
-	
 	private void updateTransitionsEnabled() {
 		for(AbstractTransition t: currentLocation.getOutgoingTransition()) {
 			TransitionSyncComponent transition = (TransitionSyncComponent) t; 
