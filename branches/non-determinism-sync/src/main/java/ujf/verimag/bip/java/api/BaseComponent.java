@@ -25,9 +25,10 @@ public abstract class BaseComponent extends Component implements Runnable {
 	}
 	
 	public void setSynced() {
+		int i = 0;
 		for(AbstractTransition transition : currentLocation.getOutgoingTransition()) {
 			if(transition.guard())
-				transition.getSendPort().setSynced();
+				transition.getSendPort().setSynced(i++);
 		}
 	}
 	
@@ -93,8 +94,11 @@ public abstract class BaseComponent extends Component implements Runnable {
 	public void run() {
 		while(true) {
 			try {
+				//System.out.println("sendind notification... " + this);
 				notifyEngine();
+				//System.out.println("the notification has been sent. Waiting the Engine..." + this);
 				semaphore.acquire();
+				//System.out.println("The engine notified " + this);
 			}
 			catch (InterruptedException e) {
 				// An interrupt has been sent from the engine, in case of global deadlock. 

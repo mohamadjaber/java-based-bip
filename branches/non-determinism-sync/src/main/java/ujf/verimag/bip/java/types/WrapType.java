@@ -1,7 +1,7 @@
 package ujf.verimag.bip.java.types;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import ujf.verimag.bip.java.api.BaseComponent;
 import ujf.verimag.bip.java.api.Component;
@@ -19,9 +19,9 @@ public class WrapType<T extends Object> {
 	/**
 	 * Temporary copies of the original value. This is used to handle non-deterministic choice in the sync Components.
 	 * Depending on the up actions (non-deterministic transitions) and different values received from the bottom component.  
-	 */
-	private List<T> copyValues;
-		
+	 */	
+
+	private Map<Integer,T> copyValues; 
 	
 	public WrapType(Component component, T value) {
 		this(component);
@@ -30,36 +30,30 @@ public class WrapType<T extends Object> {
 	
 	
 	public WrapType(Component component) {
-		copyValues = new LinkedList<T>();
+		copyValues = new HashMap<Integer,T>();
 		this.component = component; 
 		this.component.addVariable(this);
 		originalValue = null;
 	}
-	
-	private void expands() {
-		int lastIndex = copyValues.size() - 1;
-		while(lastIndex < component.getIndexTransitionEnabled()) {
-			copyValues.add(originalValue);
-			lastIndex++;
-		}
-	}
+
 	
 	public void updateOriginalValue() {
 		int index = component.getIndexTransitionEnabled();
-		if(index > 0) {
-			assert(index < copyValues.size());
+		if(copyValues.containsKey(index))
 			originalValue = copyValues.get(index);
-		}
 	}
 	
 	public T getValue() {
 		if(component instanceof BaseComponent)
 			return originalValue;
-				
-		expands();
+		int index = component.getIndexTransitionEnabled();
+		if(copyValues.containsKey(index))
+			return copyValues.get(index);		
 		
-		return copyValues.get(component.getIndexTransitionEnabled());
+	//	System.out.println("OOOPS " + index + "  size:" + copyValues.size());
+		return originalValue;
 	}
+	
 	
 	
 	public void setValue(T value) {
@@ -67,8 +61,10 @@ public class WrapType<T extends Object> {
 			originalValue = value;
 			return;
 		}
-		expands();
-		copyValues.set(component.getIndexTransitionEnabled(), value); 
+		
+	//	if(copyValues.containsKey(component.getIndexTransitionEnabled()))
+	//			System.out.println("ooops override");
+		copyValues.put(component.getIndexTransitionEnabled(), value);
 	}
 	
 	public void reset() {

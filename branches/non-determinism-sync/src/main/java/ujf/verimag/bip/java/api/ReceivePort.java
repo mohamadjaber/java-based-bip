@@ -25,9 +25,9 @@ public  class ReceivePort {
 		return sendPort;
 	}
 	
-	public synchronized void setSynced() {		
+	public void setSynced(int index) {		
 		synced = true; 
-		component.updateSynced(this, component.getCurrentIndexNotified());
+		component.updateSynced(this, index);
 	}
 	
 	public void reset() {

@@ -27,9 +27,9 @@ public class SendPort  {
 	}
 	
 	
-	public synchronized void setSynced() {
+	public void setSynced(int index) {
 		for(ReceivePort rcvPort: receivePorts) {
-			rcvPort.setSynced();
+			rcvPort.setSynced(index);
 		}
 	}
 
@@ -48,7 +48,6 @@ public class SendPort  {
 		}
 	}
 	
-
 		
 	public WrapType<?> getVariable(int index) {
 		return variables.get(index);

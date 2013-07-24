@@ -88,17 +88,17 @@ public abstract class Component {
 		currentLocation = l; 
 	}
 	
-	public int getCurrentIndexNotified() {
-		return allTransitionsEnabled.size();
-	}
+
 	
 	public void setIndexTransitionEnabled(int index) {
 		indexTransitionEnabled = index; 
 	}
 	
+	
 	public int getIndexTransitionEnabled() {
 		return indexTransitionEnabled;
 	}
+	
 	
 	public TransitionEnabled getTransitionEnabled(int index) {
 		return currentTransitionsEnabled.get(index);

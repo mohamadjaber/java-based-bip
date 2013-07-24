@@ -75,8 +75,7 @@ public class EngineImpl implements Engine {
 			currentSelected.propagateEnablePorts(componentEnablePort, currentSelected.getRandomTopTransitionEnable());
 			topEnableSyncComponentSelected.add(currentSelected);
 		}
-		
-		
+					
 		if(topEnableSyncComponentSelected.size() == 0) {
 			for(BaseComponent component: compound.getBaseComponents())
 				component.getThread().interrupt();

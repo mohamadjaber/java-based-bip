@@ -1,4 +1,4 @@
-package ujf.verimag.bip.java.pots;
+package ujf.verimag.bip.java.post.simple;
 
 public class Configuration {
 	
