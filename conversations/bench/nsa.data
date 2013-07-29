@@ -1,0 +1,8 @@
+# size of local array is equal to 1000
+#nb of base (2^k)   normal      normal-merger   non-deterministic-normal  non-deterministic-merger
+2                     0.28        0.269               0.86                         0.79
+3                     0.8         0.79                3.6                          2.2
+4                     3.3         3.2                 9.5                          9
+5                     18.9        17.3                56                           56
+6                     121.43      112.4               626                          611                       
+ 
