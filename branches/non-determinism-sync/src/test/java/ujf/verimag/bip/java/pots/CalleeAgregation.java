@@ -14,7 +14,7 @@ public class CalleeAgregation extends SyncComponent {
 	
 	public ReceivePort[] callees = new ReceivePort[Configuration.nbOfClients];
 	public SendPort callee = new SendPort(this, calleeId, callerId);
-	
+
 	private Location l0 = new Location(this);
 
 	

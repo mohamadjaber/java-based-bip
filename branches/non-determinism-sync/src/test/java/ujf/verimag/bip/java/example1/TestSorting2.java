@@ -11,8 +11,8 @@ import ujf.verimag.bip.java.engine.EngineImpl;
 
 
 public class TestSorting2 extends Compound {
-	private int nbOfAtoms = 32; // should be equal 2^n (n >= 2)
-	private int sizeLocalArray = 20;
+	private int nbOfAtoms = Configuration.nbOfAtoms; // should be equal 2^n (n >= 2)
+	private int sizeLocalArray = 1000;
 	
 	public TestSorting2() {		
 		ArrayAtom[] baseComponents = new ArrayAtom[nbOfAtoms];
@@ -67,6 +67,19 @@ public class TestSorting2 extends Compound {
 		
 	}
 	
+	/*
+	public static void main(String[] args) throws InterruptedException {
+		TestSorting2 top = new TestSorting2();
+		double startTime, stopTime;
+		startTime = System.currentTimeMillis();
+		EngineImpl engine = new EngineImpl(top);
+		engine.getThread().join();
+		stopTime = System.currentTimeMillis();
+		System.out.println("Total Time (seconds): " + (stopTime-startTime)/1000);
+	}
+	*/
+	
+	
 	@Test
 	public void testMain() throws InterruptedException {
 		TestSorting2 top = new TestSorting2();
@@ -74,5 +87,6 @@ public class TestSorting2 extends Compound {
 		engine.getThread().join();
 		assertTrue(true);
 	}
+	
 	
 }

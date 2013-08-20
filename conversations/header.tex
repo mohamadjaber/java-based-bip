@@ -81,12 +81,19 @@
 \newcommand{\less}{\prec}
 
 \newcommand{\compmodel}{GR-LTS}
+\newcommand{\datamodel}{\compmodel{} with data}
 \newcommand{\grant}[1]{\ensuremath{{#1}^{g}}}
 \newcommand{\request}[1]{\ensuremath{{#1}^{r}}}
 \newcommand{\pin}{\grant{P}}
 \newcommand{\pout}{\request{P}}
 \newcommand{\topo}[1]{\ensuremath{\tau({#1})}}
-\newcommand{\compose}[1][\ ]{\ensuremath{\ \parallel\!\!{#1}}}
+\newcommand{\compose}[1][]{\ensuremath{\parallel\!\!{#1}}}
+%% \newcommand{\hide}[2][]{\ensuremath{\left({#2}\right)\!\setminus\!{#1}}}
+\newcommand{\hide}[2][]{\ensuremath{
+  \left({#2}\right)
+  \rule[-0.5\baselineskip]{0.5pt}{1.1\baselineskip}_{#1}}
+}
+\newcommand{\mix}{\ensuremath{\smallfrown}}
 \newcommand{\true}{\ensuremath{\mathtt{t\!t}}}
 \newcommand{\false}{\ensuremath{\mathtt{f\!f}}}
 \newcommand{\data}[1][]{\ensuremath{\cD^{#1}}}
@@ -94,7 +101,8 @@
 \newcommand{\guard}{\ensuremath{g}}
 \newcommand{\up}{\ensuremath{u}}
 \newcommand{\down}{\ensuremath{d}}
-\newcommand{\undata}[1]{\ensuremath{\sigma({#1})}}
+\newcommand{\combine}[1][{}]{\ensuremath{c^{#1}}}
+\newcommand{\undata}[1]{\ensuremath{\sigma\left({#1}\right)}}
 \newcommand{\portdata}[1]{\ensuremath{\mathbf{#1}}}
 
 \newcommand{\intsem}[1]{\ensuremath{\|{#1}\|}}

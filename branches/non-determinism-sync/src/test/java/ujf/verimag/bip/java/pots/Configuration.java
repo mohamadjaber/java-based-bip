@@ -2,7 +2,7 @@ package ujf.verimag.bip.java.pots;
 
 public class Configuration {
 	
-	public static int nbOfClients = 20;
+	public static int nbOfClients = 10;
 	
 	/**
 	 * 

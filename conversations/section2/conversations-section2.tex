@@ -47,39 +47,36 @@ such behaviour as well as the implied composition operator.
 
 \begin{definition}[System]
   \label{defn:system}
-  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{})}{i \in [1,n]}$ be
-  a finite set of \compmodel{} and denote $\pin \bydef{=} \bigcup_{i=1}^n
-  \pin_i$ and $\pout \bydef{=} \bigcup_{i=1}^n \pout_i$.  $S$ is a
-  \emph{system} iff the following two conditions hold:
-  \begin{enumerate}
-  \item the sets of request ports of all the \emph{components} are pairwise
-    disjoint, \ie $\forall i \neq j,\ \pout_i \cap \pout_j = \emptyset$;
-  \item any grant port belonging to more than one component is also a
-    request port of some component, \ie $\forall p, \left(\exists i \neq j:
-    p \in \pin_i \cap \pin_j \implies p \in \pout\right)$.
-  \end{enumerate}
+  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{})}{i \in [1,n]}$
+  be a finite set of \compmodel{} and denote $\pin \bydef{=}
+  \bigcup_{i=1}^n \pin_i$ and $\pout \bydef{=} \bigcup_{i=1}^n \pout_i$.
+  $S$ is a \emph{system} iff the sets of request ports of all the
+  \emph{components} are pairwise disjoint, \ie $\forall i \neq j,\ \pout_i
+  \cap \pout_j = \emptyset$.
 
-  A system is \emph{closed} if $\pin \subseteq \pout$.  Otherwise it is
-  \emph{open}.
+  A system is \emph{closed} if $\pin = \pout$.  Otherwise it is
+  \emph{open}.  
 \end{definition}
 
-To simplify the presentation, below we postulate that for any $q$, the
-predicate $q \goesto{\emptyset} q$ is true, whenever it appears in the
-premises of an SOS rule.
+%% To simplify the presentation, below we postulate that for any $q$, the
+%% predicate $q \goesto{\emptyset} q$ is true, whenever it appears in the
+%% premises of an SOS rule.
 
-\begin{definition}[Operational semantics of a system]
+\begin{definition}[System composition]
   \label{defn:composition}
-  The operational semantics of a system $S = \Setdef{T_i = (Q_i, \pin_i,
-    \pout_i, \goesto{})}{i \in [1,n]}$ is given by a \compmodel{}
-  $\compose[S] \bydef{=} (Q, \pin, \pout, \goesto{})$, where
-  \begin{equation}
-    \label{eq:composition:parts}
-    Q = \prod_{i=1}^n Q_i\,,
-    \hspace{1cm}
-    \pin = \bigcup_{i=1}^n \pin_i \setminus \bigcup_{i=1}^n \pout_i\,,
-    \hspace{1cm}
-    \pout = \bigcup_{i=1}^n \pout_i \setminus \bigcup_{i=1}^n \pin_i 
-  \end{equation}
+  Consider a system $S = \Setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{})}{i
+    \in [1,n]}$.  The composition of $S$ is given by a \compmodel{}
+  $\compose[S] \bydef{=} (Q, \pin, \pout, \goesto{})$, where $Q =
+  \prod_{i=1}^n Q_i$, $\pin = \bigcup_{i=1}^n \pin_i$, $\pout =
+  \bigcup_{i=1}^n \pout_i$
+  %% \begin{equation}
+  %%   \label{eq:composition:parts}
+  %%   Q = \prod_{i=1}^n Q_i\,,
+  %%   \hspace{1cm}
+  %%   \pin = \bigcup_{i=1}^n \pin_i %\setminus \bigcup_{i=1}^n \pout_i\,,
+  %%   \hspace{1cm}
+  %%   \pout = \bigcup_{i=1}^n \pout_i %\setminus \bigcup_{i=1}^n \pin_i 
+  %% \end{equation}
   and $\goesto{}$ is the minimal transition relation inductively defined by
   the derivation rule
   \begin{equation}
@@ -100,23 +97,24 @@ premises of an SOS rule.
 
 \begin{proposition}
   \label{prop:associativity}
-  Composition operator $\compose$ in \defn{composition} is associative.
+  Composition operator $\compose[]$ in \defn{composition} is associative.
 \end{proposition}
 
 \begin{definition}[Behaviour and conversation]
   \label{defn:components}
   A \compmodel{} $(Q, \pin, \pout, \goesto{})$ is
   \begin{itemize}
-  \item a \emph{behaviour} if $\pin  = \emptyset$;
+  \item a \emph{behaviour} if it is grant-closed, \ie $\pin \subseteq
+    \pout$;
   \item a \emph{conversation} if, for any transition $q \goesto{a} q'$, both
     $a \cap \pin \neq \emptyset$ and $a \cap \pout \neq \emptyset$.
   \end{itemize}
 \end{definition}
 
 Conversations represent sequences of interactions. They are used to compose
-behaviours.  Notice that operational semantics of a closed system is a
-behaviour.  Below we will only consider systems, whereof each component is
-either a behaviour or a conversation.
+behaviours.\sidenote{Is this a meaningful restriction?} Below we will
+only consider systems, whereof each component is either a behaviour or a
+conversation.
 
 \begin{example}[BIP interaction models]
   \label{ex:bip}
@@ -144,17 +142,14 @@ either a behaviour or a conversation.
   E)$, having the components of the system as vertices and the set of edges
   $E = \setdef{(T_i,T_j)}{\pout_i \cap \pin_j \neq \emptyset}$.  In other
   words, there is an edge from $T_i$ to $T_j$ if some of the requests of
-  the former can be granted by the latter.
+  the former can be granted by the latter.  A component $T \in S$ is called
+  \emph{top-level}, if the corresponding node in $\topo{S}$ does not have
+  any outgoing edges (\ie component is a sink in $\topo{S}$).
 
   If $\topo{S}$ is a directed acyclic graph (DAG) then $S$ is a
   \emph{flow-system}.  If $\topo{S}$ is disconnected, \ie $E = \emptyset$,
   the system is \emph{independent}.
 \end{definition}
-
-Observe that any non-trivial (\ie non-empty) closed flow-system $S$
-necessarily contains a certain number of behaviours.  Each conversation can
-be assigned a \emph{level} defined as the maximal length of a directed path
-in $\topo{S}$ from some behaviour to this conversation.
 
 Composition defined by the operational semantics of systems allows
 simultaneous execution of interactions authorised by any number of
@@ -165,7 +160,7 @@ conversation can enforce simple non-deterministic mutual exclusion, as in
 
 % *********************************************************************
 
-\subsection{Data Management and Transfer in Flow-Systems}
+\subsection{Component Model with Data}
 \label{sec:data}
 
 We now extend the definitions of \secn{model} to incorporate data.  To
@@ -177,10 +172,10 @@ decision as to what transitions are enabled.  Finally, once a global
 interaction has been choosen at the top level, the updated data is
 propagated back to behaviours.  Below, we present this in a formal manner.
 
-\begin{definition}[\compmodel{} with data]
+\begin{definition}[\datamodel{}]
   \label{defn:data}
-  A \emph{\compmodel{} with data} is a tuple $T=(Q, \pin, \pout, \goesto{},
-  \local{\data}, \data, \guard, \up, \down)$, where
+  A \emph{\datamodel{}} is a tuple $T=(Q, \pin, \pout, \goesto{},
+  \local{\data}, \data, \guard, \up, \down, \combine)$, where
   \begin{itemize}
   \item $(Q, \pin, \pout, \goesto{})$ is a \compmodel{},
   \item $\local{\data}$ is the \emph{local data domain},
@@ -198,6 +193,12 @@ propagated back to behaviours.  Below, we present this in a formal manner.
     \data[p]$.  $\up(t)$ propagates the data up from the grant ports to the
     request ports, whereas $\down(t)$ computes new values for the grant
     port variables.  Both functions can update the local variable.
+  \item Finally, $\combine = \setdef{(\combine[p], \bot^p)}{p \in \pout}$,
+    where $\combine[p]: (\data[p])^2 \rightarrow \data[p]$ is an
+    associative \emph{aggregation function}, for combining several
+    proposals for the value associated to $p$ into one, and $\bot^p$ is an
+    \emph{identity element}, such that $\forall x \in \data[p],
+    \combine[p](x, \bot^p) = \combine[p](\bot^p, x) = x$.
   \end{itemize}
 
   By abuse of notation, we write $q \goesto{a,\guard,\up,\down} q'$ for
@@ -205,22 +206,41 @@ propagated back to behaviours.  Below, we present this in a formal manner.
   and data transfer functions.
 \end{definition}
 
-Notice that, in \defn{data}, all the data preserved between two execution
-cycles is stored in the local variable.  Thus, during the upward
-propagation, data associated to request ports are not taken into account.
-On the contrary, downward propagation takes into account all data.  Precise
-operational semantics of a \compmodel{} with data is given by the following
-definition.
+Notice\sidenote{not clear} that, in \defn{data}, all the data preserved
+between two execution cycles is stored in the local variable.  Thus, during
+the upward propagation, data associated to request ports are not taken into
+account.  On the contrary, downward propagation takes into account all
+data.  Precise operational semantics of a \datamodel{} is given by the
+following definition.
+
+The aggregation function allows us to define the downward phase of the data
+transfer when one request port has several grant instances in other
+components (see \secn{data:composition}).  Some examples of such
+aggregation functions are $\mathbf{max}$, $+$, $\mathbf{first}(x_1, x_2) = x_1$.
+Another important example is 
+%
+\[
+\mathbf{ndc}(x_1, x_2) \bydef{=} 
+\begin{cases}
+  x_1, & \mbox{if } x_2 = \bot,\\
+  x_2, & \mbox{if } x_1 = \bot,\\
+  x_i, & \mbox{where $i \in \{1,2\}$ is chosen non-deterministically, 
+    otherwise.}
+\end{cases}
+\] 
+%
+Although, strictly speaking, $\mathbf{ndc}()$ is not a function, it
+posesses all the properties necessary in our context.
 
 \begin{definition}[Component operational semantics with data]
   \label{defn:data:semantics}
-  The operational semantics of a \compmodel{} with data $T = (Q,
-  \local{\data}, \data, \pin, \pout, \goesto{}, \guard, \up, \down)$ is
-  given by an LTS $\undata{T} = (Q \times \local{\data}, 2^P \times
-  \data[P] \times \data[P]$, \mbox{$\goesto{})$}, where a state $(q, v)$
-  consists of a control state of $T$ and the value $v \in \local{\data}$;
-  $\goesto{}$ is the minimal transition relation inductively defined by the
-  following rule:
+  The operational semantics of a \datamodel{} $T = (Q, \local{\data},
+  \data, \pin, \pout, \goesto{}, \guard, \up, \down, \combine)$ is given by
+  an LTS $\undata{T} = (Q \times \local{\data}, 2^P \times \data[P] \times
+  \data[P]$, \mbox{$\goesto{})$}, where a state $(q, v)$ consists of a
+  control state of $T$ and the value $v \in \local{\data}$; $\goesto{}$ is
+  the minimal transition relation inductively defined by the following
+  rule:
   \begin{equation}
     \label{eq:data:semantics}
     \renewcommand{\arraystretch}{1.5}
@@ -232,33 +252,40 @@ definition.
       \request{\portdata{v}} = 
       \request{\up}(v, \grant{\portdata{v}})
       &
-      (v', \grant{\portdata{\tilde{v}}}) =
+      (v', \grant{\portdata{v'}}) =
       \down\Big(
       \local{\up}(v, \grant{\portdata{v}}),
-      \request{\portdata{\tilde{v}}}, 
+      \request{\portdata{v'}}, 
       \grant{\portdata{v}}
       \Big)
     }{
       (q, v)
-      \goesto[\portdata{v}:\portdata{\tilde{v}}]{a}
+      \goesto[\portdata{v}:\portdata{v'}]{a}
       (q', v')
     }\,,
   \end{equation}
-  where $\local{\up}$ and $\request{\up}$ are the two components of the
-  $\up$ function; $\portdata{v}, \portdata{\tilde{v}} \in \data[P]$ are
-  \emph{data values associated to ports at the upward and downward data
-    transfer phases} respectively.
+  where $\local{\up}$, $\request{\up}$ and $\local{\down}$ are the
+  corresponding components of $\up$ and $\down$ functions respectively;
+  $\portdata{v}, \portdata{v'} \in \data[P]$ are \emph{data values
+    associated to ports at the upward and downward data transfer phases}
+  respectively.  Notice that, although ports can be shared among
+  components, different values can be associated to the same port in
+  different components.  This allows us to define $\grant{\portdata{v'}}$
+  in \eq{data:semantics} independently of how this component is to be
+  composed.
 \end{definition}
 
-For the values $\portdata{v}$ and $\portdata{\tilde{v}}$, in
-\eq{data:semantics}, it is important to notice the difference with the
-input/output dichotomy.  Indeed, the component \emph{input} is the pair
-$(\grant{\portdata{v}}, \request{\portdata{\tilde{v}}})$, whereas its
-\emph{output} is the pair $(\grant{\portdata{\tilde{v}}},
-\request{\portdata{v}})$.  Hence, the only constraint on
-$(\grant{\portdata{v}}, \request{\portdata{\tilde{v}}})$ is the guard in
-the second premise.
-
+\begin{note}
+  \label{rem:io}
+  For the values $\portdata{v}$ and $\portdata{v'}$, in
+  \eq{data:semantics}, it is important to notice the difference with the
+  input/output dichotomy.  Indeed, the component \emph{input} is the pair
+  $(\grant{\portdata{v}}, \request{\portdata{v'}})$, whereas its
+  \emph{output} is the pair $(\grant{\portdata{v'}},
+  \request{\portdata{v}})$.  Hence, the only constraint on
+  $(\grant{\portdata{v}}, \request{\portdata{v'}})$ is the guard in the
+  second premise.
+\end{note}
 %% It is important to notice that, in \eq{data:semantics}, the request
 %% component of the upward transfer function $\up$ is discarded and both the
 %% downward transfer and destination state rely on the unrestricted value
@@ -269,85 +296,338 @@ the second premise.
 %% request ports in the components one level down in the topology and
 %% vice-versa, in the downwards transfer phase.
 
-\begin{definition}[Flow-System operational semantics with data]
-  \label{defn:data:composition}
-  Let $S = \setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{}, \local{\data}_i,
-    \data_i, \guard_i, \up_i, \down_i)}{i \in [1,n]}$ be a set of
-  \compmodel{} with data, such that the underlying \compmodel{} form a
-  flow-system (\defn{topology}).  We call $S$ a \emph{data-coherent
-    flow-system} if the data domains agree on ports belonging to several
-  components:
+% *********************************************************************
+
+\subsection{Composition of Components with Data}
+\label{sec:data:composition}
+
+\begin{definition}[Data coherency]
+  \label{defn:data:coherency}
+  Let \[S = \Setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{},
+    \local{\data}_i, \data_i, \guard_i, \up_i, \down_i, \combine_i)}{i \in
+    [1,n]}\] be a set of \datamodel{}.  We call $S$ \emph{data-coherent}
+  if, for each port belonging to several components, the corresponding data
+  domains coincide:
   \begin{equation}
     \label{eq:data:coherency}
     \forall p \in P,\ \forall i,j \in [1,n],\ 
-    \left(
+    \Big(
     p \in \pout_i \cap \pin_j \implies \data[p]_i = \data[p]_j
-    \right)\,,
+    \Big)\,,
   \end{equation}
   where $P \bydef{=} \bigcup_{i=1}^n P_i$.
+\end{definition}
 
-  The operational semantics of a data-coherent flow-system with data is
-  given by an LTS $\undata{S} = (Q \times \local{\data}, 2^P \times
-  \data[P] \times \data[P], \goesto{})$, where
+Recall that request port sets of different components in a system are
+disjoint, hence only one aggregation function is defined for each request
+port.  Thus, there is no need to take aggregation functions into account in
+the definition of coherency.
+
+\begin{definition}[Composition of \datamodel{}]
+  \label{defn:data:composition}
+  Let $T_i = (Q_i, \pin_i, \pout_i, \goesto{}, \local{\data}_i, \data_i,
+  \guard_i, \up_i, \down_i, \combine_i)$, for $i=1,2$, be two data-coherent
+  \datamodel{}.  Their parallel composition is a \datamodel{} $T_1
+  \parallel T_2 \bydef{=} (Q, \pin, \pout, \goesto{}, \local{\data}, \data,
+  \guard, \up, \down, \combine)$, where $(Q, \pin, \pout, \goesto{}) =
+  (Q_1, \pin_1, \pout_1, \goesto{}) \parallel (Q_2, \pin_2, \pout_2,
+  \goesto{})$ (see \defn{composition}), $\local{\data} = \local{\data}_1
+  \times \local{\data}_2$, $\data = \data_1 \cup \data_2$, $\combine =
+  \combine_1 \cup \combine_2$ (here $+$ is the function coproduct) and, for
+  each transition $t = (q \goesto{a} q')$, putting $a_i = a \cap P_i$, for
+  $i=1,2$,
+  \[
+    \guard(t)(v_1, v_2, \grant{\portdata{v}}_1,\grant{\portdata{v}}_1)\ 
+    \bydef{=}\
+    \guard(t_1)(v_1, \grant{\portdata{v}}_1) \land
+    \guard(t_2)(v_2, \grant{\portdata{v}}_2) \land
+    \Big(\forall p \in \pin_2 \cap \pout_1,\,
+    \portdata{v}^p_2 = \up^p(v_1, \grant{\portdata{v}}_1)\Big)\,;
+  \]
+  the functions $\up$ and $\down$ are computed as follows (\cf
+  \rem{io}):
+  \begin{enumerate}
+  \item \label{up1} Applying $\up_1$ to the locally stored value $v_1$ and
+    $\grant{\portdata{v}}_1$, in $T_1$, compute the intermediate locally
+    stored value $\tilde{v}_1$ and data values
+    $\request{\portdata{\tilde{v}}}_1$ associated to the request ports in
+    $\request{a}_1$;
+  \item \label{transfer1} For all shared ports $p \in \pin_2 \cap \pout_1$,
+    assign the corresponding intermediate values $\portdata{\tilde{v}}^p_2
+    = \portdata{\tilde{v}}^p_1$, ports $p \in \pin_2 \setminus \pout_1$
+    stay unchanged: $\portdata{\tilde{v}}^p_2 = \portdata{v}^p_2$;
+  \item \label{up2} Applying $\up_2$ to the locally stored value $v_2$ and
+    $\grant{\portdata{\tilde{v}}}_2$, in $T_2$, compute the intermediate
+    locally stored value $\tilde{v}_2$ and the data values
+    $\request{\portdata{v}}_2$ associated to the request ports in
+    $\request{a}_2$;
+  \item \label{down2} Applying $\down_2$ to $\tilde{v}_2$ in $T_2$ and
+    $\request{\portdata{v'}}_2$, compute the final locally stored value
+    $v'_2$;  and the data values $\grant{\portdata{v'}}_2$ associated to the
+    grant ports in $\grant{a}_2$;
+  \item \label{transfer2} For all ports $p \in \pin_2 \cap \pout_1$,
+    compute the corresponding values by assigning
+    $\portdata{v'}^p_1 := \combine[p]_1(\portdata{v'}^p_2, \portdata{v'}^p_1)$;
+  \item \label{down1} Applying $\down_1$ to $\tilde{v}_1$ in $T_1$ and
+    $\request{\portdata{v'}}_1$, compute the final locally stored value
+    $v'_1$;  and the data values $\grant{\portdata{v'}}_1$ associated to the
+    grant ports in $\grant{a}_1$;
+  \item \label{final} Function values to be defined are then given by the
+    two equations
+    \[
+    \up(v_1, v_2, \grant{\portdata{v}}_1, \grant{\portdata{v}}_2)
+    \bydef{=}
+    (\tilde{v}_1, \tilde{v}_2, 
+    \request{\portdata{v}}_1, \request{\portdata{v}}_2)\,,
+    \hspace{1cm}
+    \down(v_1, v_2, 
+      \request{\portdata{v'}}_1, 
+      \grant{\portdata{v}}_1, 
+      \request{\portdata{v'}}_2, 
+      \grant{\portdata{v}}_2, 
+    )
+    \bydef{=}
+    (v'_1, v'_2, 
+      \grant{\portdata{v'}}_1, 
+      \grant{\portdata{v'}}_2
+    )\,.
+    \]
+  \end{enumerate}
+  The only data preserved between successive computations above are the
+  locally stored values $v_1$ and $v_2$, which are also parameters of both
+  $\up$ and $\down$.  Also, it is clear that $\up$ and $\down$ are defined
+  whenever $\up_i$ and $\down_i$ are defined for both $i = 1,2$.  Hence
+  $\up$ and $\down$, defined by the above procedure, are, indeed,
+  functions.
+\end{definition}
+
+\begin{note}
+  \label{rem:transfer}
+  In the above definition, it is important to observe that during the upward
+  data transfer the values $\portdata{v}_2$ associated to the ports realizing
+  the connection between $T_1$ and $T_2$ are discarded and replaced by the
+  intermediate values computed at step \ref{transfer1}.  Therefore, even
+  though these values are listed as parameters of the $\up$ function, they do
+  not affect its computed value.  On the contrary, during the downward phase
+  (step \ref{transfer2}), the corresponding values $\portdata{v'}_1$ are not
+  overwritten, but combined with the values computed at step \ref{down2}.
+\end{note}
+
+This definition can be extended to arbitrary flow-systems in a
+straightforward manner.
+
+\begin{proposition}
+  \label{prop:data:associativity}
+  Composition operator $\parallel$ in \defn{data:composition} is
+  associative.
+\end{proposition}
+%
+\begin{proof}[Sketch of the proof]
+  \prop{associativity} states that parallel composition of the underlying
+  \compmodel{} is associative.  Hence, we only have to show that the
+  definition of data transfer and guard functions is consistent.  
+
+  All computation steps \ref{up1}--\ref{final} in \defn{data:composition}
+  are performed locally.  Hence, to prove associativity, it is sufficient
+  to show that the input values provided to the functions involved are
+  independent of the computation path.
+
+  Since the topology of any flow-system is a DAG, for each request port in
+  the system, there is a unique maximal path leading to this port in the
+  underlying topology.  This path unambigously defines the calculation of
+  the data value associated to this port during the upward data transfer
+  phase.  As an immediate consequence, all the guard valuations are also
+  unambigously defined.
+
+  For the downward transfer phase, the values associated to the grant ports
+  are defined by the combination of all paths in the inverted topology,
+  leading to this port from the top-level conversations participating in
+  the interaction.  However, the only conflicts possible during this
+  computation appear at steps \ref{transfer2} in \defn{data:composition}.
+  Since all aggregation functions are associative, this does not impact any
+  of the intermediate values.
+\end{proof}
+
+% *********************************************************************
+
+\subsection{Modularity}
+\label{sec:modularity}
+
+In the previous sections, we have defined a component model and operational
+semantics, combining \compmodel{} with data management and transfer
+(\defn{data}).  In this section, we show how such components can be bundled
+together to be used as \emph{modules} in larger systems.  A common
+intuition, when a flow-system is built to be used as a subsystem of a
+larger one, is that the ports of the subsystem are the non-connected ports
+of its components.  
+
+\begin{definition}[Internal and external ports]
+  \label{defn:port:types}
+  Let $S$ be a system with the sets of request and grant ports $\pin$ and
+  $\pout$ respectively.  We call the ports $p \in \pin \cap \pout$
+  \emph{internal} and $p \in \pin \Delta \pout$ \emph{external}.
+\end{definition}
+
+\begin{definition}[Hiding of ports]
+  \label{defn:data:hiding}
+  Let \[S = \Setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{},
+    \local{\data}_i, \data_i, \guard_i, \up_i, \down_i, \combine_i)}{i \in
+    [1,n]}\] be a data-coherent flow-system and $\compose[S] = (Q, \pin,
+  \pout, \goesto{}, \local{\data}, \data, \guard, \up, \down, \combine)$ be
+  the corresponding \datamodel{} as defined in \defn{data:composition}.
+  For any subset of ports $X \subseteq P$, the application to $\compose[S]$
+  of the \emph{hiding operator} $\hide[X]{\cdot}$ is given by the
+  \datamodel{} $\hide[X]{\compose[S]} = (Q, \pin \setminus X, \pout
+  \setminus X, \goesto{}, \local{\data}, \setdef{\data[p]}{p \in P
+    \setminus X}, \guard, \up, \down')$.  Here, $Q$, $\local{\data}$,
+  $\goesto{}$, $\guard$ and $\up$ are the same as in $\compose[S]$.  The
+  function $\down'$ is defined as follows
   \begin{equation}
-    \label{eq:data:parts}
+    \label{eq:data:hiding}
+    \down'\Big(v_1, \dots, v_n, 
+      (\portdata{\tilde{v}}^p)_{p \in \pout \setminus X}, 
+      (\portdata{v}^p)_{p \in \pin \setminus X}
+    \Big) 
+    \bydef{=} 
+    \down\Big(v_1, \dots, v_n, 
+      (\portdata{\tilde{v}}^p)_{p \in \pout \setminus X}, 
+      (\bot^p)_{p \in \pout \cap X},
+      (\portdata{v}^p)_{p \in \pin \setminus X}
+    \Big)\,.
+  \end{equation}
+
+  Recall (\rem{transfer}) that the values $\portdata{v}^p$, for $p \in \pin
+  \cap X$ do not affect the value of $\down()$.  Hence, there is no need to
+  specify them in \eq{data:hiding}.
+
+  We denote $\hide[int]{\compose{S}} \bydef{=} \hide[\pin \cap
+    \pout]{\compose{S}}$ the \datamodel{} obtained by hiding all internal
+  ports in the composed system $S$.
+\end{definition}
+
+\begin{definition}[Flow-system operational semantics with data]
+  \label{defn:flow:semantics}
+  Let \[S = \Setdef{T_i = (Q_i, \pin_i, \pout_i, \goesto{},
+    \local{\data}_i, \data_i, \guard_i, \up_i, \down_i, \combine_i)}{i \in
+    [1,n]}\] be a data-coherent flow-system.  Its operational semantics is
+  given by an LTS $\undata{S} = (Q \times \local{\data}, 2^P \times
+  \data[P] \times \data[P], \goesto{})$, with
+  \begin{equation}
+    \label{eq:flow:parts}
     Q = \prod_{i=1}^n Q_i\,,
+    \hspace{1cm}
+    P = \left(\bigcup_{i=1}^n \pin_i\right) 
+      \Delta 
+      \left(\bigcup_{i=1}^n \pout_i\right)\,,
     \hspace{1cm}
     \local{\data} = \prod_{i=1}^n \local{\data}_i\,,
     \hspace{1cm}
-    \data = \bigcup_{i=1}^n \data_i\,
+    \data = \Setdef{\data[p]}{p \in P}\,,
   \end{equation}
-  and \goesto{} is the minimal transition relation inductively defined by
-  the derivation rule
+  where $\Delta$ is the symmetric difference; \goesto{} is the minimal
+  transition relation inductively defined by the derivation rule
   \begin{equation}
-    \label{eq:data:composition}
+    \label{eq:flow:semantics}
     \renewcommand{\arraystretch}{1.5}
     \derrule[3]{
       a \subseteq P
       &
+      \forall i \in [1,n],\,
       (q_i,v_i) 
       \goesto[\portdata{v}_i:\portdata{\tilde{v}}_i]{a \cap P_i}
       (q_i', v_i')
       &
+      \forall i,\,
       \forall p \in \pout_i \cap \pin,
       \begin{cases}
-      \forall j \in [1,n],\ p \in \pin_j \Rightarrow 
-      \portdata{v}_i^p = \portdata{v}_j^p
-      \\
-      \exists j \in [1,n]: p \in \pin_j \land 
-      \portdata{\tilde{v}}^p_i = \portdata{\tilde{v}}^p_j
+      \forall j,\, p \in \pin_j \Rightarrow 
+      \portdata{v}_i^p = \portdata{v}_j^p\\
+      %% \exists j \in [1,n]: p \in \pin_j \land 
+      \portdata{\tilde{v}}^p_i = 
+      \combine[p]_i \Big((\portdata{\tilde{v}}^p_j)_{p \in \pin_j}\Big)\\
       \end{cases}
-      %% \forall i \neq j, \Big(
-      %% p \in \request{P_i} \cap \grant{P_j} 
-      %% \implies
-      %% \portdata{v}_i^p = \portdata{v}_j^p 
-      %% \land
-      %% \portdata{\tilde{v}}^p_i = \portdata{\tilde{v}}^p_j 
-      %% \Big)
     }{      
       (q_1\dots q_n, v_1\dots v_n)
-      \goesto[]{a}
+      \goesto[\portdata{v}:\portdata{\tilde{v}}]{a}
       (q_1'\dots q_n', v_1'\dots v_n')
     }\,,
   \end{equation}
-  where, the second premise is a transition in $\undata{T_i}$.
+  where $\portdata{v}^p = \portdata{v}^p_i$ and $\portdata{\tilde{v}}^p =
+  \portdata{\tilde{v}}^p_i$, for all $p \in P \cap P_i$, and the second
+  premise is a transition in $\undata{T_i}$.
 \end{definition}
 
-It is important to notice that the third premise in \eq{data:composition}
-states that, during the upward transfer phase, the data is propagated in a
-{\em broadcast} manner, \ie the same value is transferred from a request
-instance of a port to {\em all} corresponding grant instances; on the
-contrary, during the downward transfer phase, only one of the grant values
-gets assigned to the corresponding request value.  The intuition behind
-this choice is based on the service analogy: one component can request the
-same service from several components providing it, the latter make their
-proposals, whereof only one is actually chosen.
+The third premise in \eq{flow:semantics} states that, during the upward
+transfer phase, the data is propagated in a \emph{broadcast} manner, \ie
+the same value is transferred from a request instance of a port to
+\emph{all} corresponding grant instances; during the downward transfer
+phase, request values are assigned aggregations of the corresponding grant
+values. 
+
+%% \begin{lemma}
+%%   For two flow-systems $S_1$ and $S_2$ that only share external ports and
+%%   such that $S_1 \cup S_2$ is data-coherent, holds the property
+%%   \begin{equation}
+%%     \hide[int]{\hide[int]{\compose{S_1}} \parallel \hide[int]{\compose{S_2}}}
+%%     =
+%%     \hide[int]{\compose{(S_1 \cup S_2)}}\,,
+%%   \end{equation}
+%%   where \hide[int]{\cdot} is the operator hiding all internal ports of the
+%%   operand system.
+%% \end{lemma}
+
+\begin{theorem}
+  \label{thm:compositionality}
+  Operational semantics of the flow-systems with data is compositional. In
+  other words, for any  data-coherent system of \datamodel{} $S$,
+  holds
+  \begin{equation}
+    \label{eq:compositionality}
+    \undata{\hide[int]{\compose[S]}} = \undata{S}\,,
+  \end{equation}
+  where, in the left-hand side, $\undata{\cdot}$ is the semantic function
+  on \datamodel{} introduced in \defn{data:semantics}, whereas, in the
+  right-hand side, $\undata{\cdot}$ is the semantic function on
+  flow-systems introduced in \defn{flow:semantics}.
+\end{theorem}
+%
+\begin{proof}[Sketch of the proof]
+  Let $S = \setdef{(Q_i, \pin_i, \pout_i, \goesto{}, \local{\data}_i,
+    \data_i, \guard_i, \up_i, \down_i, \combine_i)}{i \in [1,n]}$.
+  Clearly, all elements composing the state space and the label set of the
+  LTS on both sides of \eq{compositionality} coincide.  Therefore, we only
+  have to show that so do the corresponding transition relations.  By
+  comparing \eq{data:hiding} and \eq{flow:semantics}, we conclude that this
+  follows from the requirement that, for any $p \in P$ and any $x \in
+  \data[p]$, $\combine[p](x, \bot^p) = x$.
+\end{proof}
+
+% *********************************************************************
+
+\subsection*{Work In Progress Notes}
+
+In the definition of \datamodel{} (\defn{data}), we can add another level
+of inderection, by replacing the constant identity element $\bot^p$ by an
+associative function $\bot^p: (\data[p])^2 \rightarrow \data[p]$.  This
+would allow us to consider yet another aggregation function
+\[
+  \mathbf{equals}(x_1,x_2) = \bot(x_1,x_2) = 
+  \begin{cases}
+    x_1, & \mbox{if } x_1 = x_2,\\
+    error, & \mbox{if } x_1 \neq x_2.
+  \end{cases}
+\]
+For other examples, the $\bot^p$ function is constant.  
+
+However, I think this would only obscure the formalisation.
 
 % *********************************************************************
 
 \subsection{Expressiveness Results}
 \label{sec:expressiveness}
 
+{\em Expressiveness results should probably go into a separate section at
+  the end, after the implementation details and the use case.}
 
 Types of conversations:
 \begin{itemize}
