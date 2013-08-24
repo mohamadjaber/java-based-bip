@@ -1,0 +1,19 @@
+\usepackage{color}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
+
+\lstdefinestyle{customjava}
+{language=java,
+keywordstyle=\color{blue},
+basicstyle=\ttfamily\scriptsize,
+morekeywords={String},
+mathescape=true,
+escapeinside={/*@}{@*/},
+commentstyle=\color{dkgreen},   % comment style
+keywordstyle=[2]{\color{red}},
+frame=single
+}

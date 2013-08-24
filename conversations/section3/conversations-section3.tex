@@ -1,54 +1,146 @@
-% *********************************************************************
-% *********************************************************************
-
 \section{Java Implementation}
 \label{sec:java}
-We have implemented in Java a model consisting of a set of classes that represents {\compmodel} model. Roughly speaking, we distinguish between two abstract classes \texttt{Behavior} and \texttt{Conversation}. Defining a new behavior, a developer has to do the following: 
+We have implemented in Java a model consisting of a set of classes that represents {\compmodel} model. We distinguish mainly between two abstract classes \texttt{Behavior} and \texttt{Conversation}. You define a new behavior as follows:
 \begin{itemize}
 \item Create a new class that extends \texttt{Behavior} class. 
-\item Create instance variables that represent locations, data variables and send ports assigned with data variables.
-\item Create a constructor method that initialize location and create the set of transitions representing the behavior. 
-\item Each transition consists of the source location, target location, guard, send port,  and action. By default, the guard is \texttt{true} and the action is empty.  
+\item Create instance variables that represent locations, data variables and send/request ports assigned with data variables.
+\item Create a constructor method that sets the initial location and create the set of transitions representing the behavior. 
+\item Each transition consists of the source location, target location, guard, send/request port, and action. By default, the guard is \texttt{true} and the action is empty.  
 \end{itemize}
-In the same way, we define a new conversation, except that it extends \texttt{Conversation} class and it also contain receive ports. Also, a transition of a conversation component consists of the source location, target location, set of receive ports, guard, upward action, send port, downward action. 
+In the same way, we define a new conversation except that (1) it extends \texttt{Conversation} class; (2) it may contain receive/grant ports; (3) its transitions consist of a source location, target location, set of receive/grant ports, guard, upward action, send/request port, and downward action.
 
-After defining behaviors and conversations we create the system by creating a new class that extends \texttt{Compound} class. In that class, we instantiate the defined behavior and conversation classes. Finally, we connect each receive port to its corresponding send port. 
-
-
-We have implemented the semantic as proposed in Section \ref{sec:formal}. More precisely, we create a Java thread per behavior instance and another thread that plays as arbiter for selecting a top conversation component to be executing and down propagated. The execution flow is done as following: 
-\begin{itemize}
-\item Behavior components evaluates the guards of the their current outgoing transitions and notify the corresponding send ports accordingly.  
-\item Notification of a send port implies the notification of all its corresponding receive ports. 
-\item After a receive port has been notified of a specific conversation component, we evaluate its outgoing transitions whether all their receive ports have been notified. 
-\item For those transitions, we evaluation their guards and we execute their up actions. 
-\item Executing the up actions do not modify the actual data of the conversation component, but it creates a copy of those data. 
-\item If the transition has a send port, we notify that port with an index that points to the copy values obtained by the corresponding up action. 
-\item When all receive ports has been notified, the arbiter thread will be fired. Now, all behaviors are waiting. 
-\item The arbiter selects a top enabled transition of a conversation component (i.e., without a send port). If such transition does not exists, then the system contains a deadlock. 
-\item The arbiter execute the down action of that transition and update the original value w.r.t the index of the copy values of selected transition. Then, it recursively notifies the corresponding send port connected to the receive ports of that transition.  
-\item If the send port belongs to a behavior component, we disable recursively all other send ports that belong to that component. 
-\item We check for another top enabled transition of another conversation component. 
-\item If there is no top enabled transition, the arbiter notifies behavior components to executing the action of the corresponding notified send ports. 
-\end{itemize}
-
-Note that, this implementation introduces some overhead due to the create of the copy of variables. Recall that, the guard of a given transition depends on the copy of the values of the variables attached the send ports connected to receive ports of that transition. A receive port has a direct access the variables of its corresponding send port. As each receive port has been notified by a send port with different indices. Thus, evaluating the guard requires to set the indices of the bottom conversation components that correspond to send ports connected to receive ports of that transition. That is, evaluation the guard uses the corresponding copy values. As the up propagation is done in parallel by the thread of the behavior component, we need to first lock those bottom conversation components to avoid other guards that depends on those components but with different indices. The complexity of this propagation is due to the non-determinism of conversation components. 
+Finally, we create a class that extends \texttt{Compound} class representing the system. In that class, we instantiate behaviors and conversations and we connect receive/grant ports to their corresponding send/request ports. 
 
 
-However, most of the examples consist of conversation components that are deterministic. That is, from any location, at maximum one of the outgoing transitions could be enabled. This can be satisfied if for all locations (1) there exist at maximum one outgoing transition; or (2) the guards of all outgoing transitions are mutually exclusive. In that case, we do not need neither creating copy of the variables nor setting indices or locking of bottom conversation components.
-For this, we developed two implementations that assume non-deterministic and deterministic conversation components, respectively. Non-determinism of conversation components add more expressiveness but introduce some overhead.  
+We have implemented the semantic proposed in Section \ref{sec:formal}. More precisely, we create a Java thread per behavior instance and another thread that plays as arbiter for selecting a top conversation component to be executed and down propagated. The execution flow is done as follows. Behaviors evaluate the guards of the their current outgoing transitions and notify the corresponding send ports accordingly. A send/request port notifies all of its corresponding receive/grant ports. When a receive/grant port, of a conversation component, has been notified, we identify the set of the current outgoing transitions where all their receive ports have been notified. We evaluate the guards of those transitions and we execute the corresponding upward action when the guard is evaluated to true. Note that, the upward action does not modify the actual data of a conversation component but it creates a copy of its data. This is due to the fact that conversation components could be non-deterministic. That is, more than one of the current outgoing transitions of a given conversation component could be enabled. Each of which has an upward action that may modify the data of that component. For this, components' variables should be of type \texttt{WrapType}. \texttt{WrapType} contains the actual value of a variable and a map from indices to values. It also contains \texttt{getVal} and \texttt{setVal()} methods. 
+For a given index, \texttt{getVal()} returns the actual value if the index does not exist in the map, otherwise it returns the corresponding value using the map. \texttt{setVal()} adds the given index along with the given value to the map. 
+
+If the transition has a send/request port, we notify that port with an index. That is, an index identifies a transition and it also identifies the indices of the corresponding receive ports of that transition. 
+Note that, a receive port has a direct access to the variables of its corresponding send port. Recall that, the guard of a given transition depends on the value of the variables attached to the send ports that are connected to the receive ports of that transition. So that, before evaluating the guard of a given transition of conversation component, we need first to set the corresponding indices of the bottom conversation components so that \texttt{getVal()} will return the right value. Note that, the upward notifications are done by behaviors' components, that is are done in parallel. For this, before setting the indices of the bottom components, we need first to lock those components to avoid the evaluation of other guards that depend on those components but with different indices. 
+
+Moreover, before executing the upward action we increment the index that represents the current evaluated transition, so that \texttt{setVal()} sets the values properly. 
+
+
+When all receive ports have been notified, the arbiter thread will be fired. Now, behaviors' components are waiting.  The arbiter selects a top enabled transition of a conversation component (i.e., a transition without a send port, or with a send port but not connected). If such a transition does not exist, the system is deadlocked. Otherwise, the arbiter sets the indices of the bottom components of the selected transition and it executes the down action. Then, it updates the original values w.r.t the index of the selected transition. After that, it recursively notifies the corresponding send port connected to the receive ports of that transition. If a send port belongs to a behavior's component, we disable recursively all other send ports that belong to that component. Then, We check for another top enabled transition of another conversation component. If there is no top enabled transition, the arbiter notifies behavior's components to execute the action of the notified send ports. 
+
+
+The complexity of this propagation is due to the non-determinism of conversation components. Also, locking bottom components drastically reduces the efficiency of the implementation. As most of the systems consist of conversation components that are deterministic. That is, from any location, at maximum one of the outgoing transitions could be enabled. This can be satisfied if for all locations (1) there exist at maximum one outgoing transition; or (2) the guards of all outgoing transitions are mutually exclusive. In that case, the indices are useless as well as locking of bottom conversation components.
+For this, we have developed two implementations that assume non-deterministic and deterministic conversation components, respectively. Clearly, non-determinism of conversation components adds more expressiveness but introduces some overhead. 
+
+
 
 
 \begin{figure}
-\scalebox{0.5}{\input{fig/pots.pdf_t}}
+\centering
+\begin{subfigure}[b]{0.71\textwidth}
+\centering
+\begin{lstlisting}[style=customJava]
+public class Generator extends Behavior {
+  private Location l0 = new Location(this);
+  public SendPort s = new SendPort(this);
+  public Generator(Compound compound) {
+    super(compound);
+    setInitial(l0);
+    addTransition(new Transition(l0,l0,s) {
+      // default guard and action
+    });
+  }
+}
+
+public class Modulo2 extends Conversation {
+  private Location l0 = new Location(this);
+  private Location l1 = new Location(this); 
+  public SendPort s = new SendPort(this);
+  public ReceivePort r = new ReceivePort(this);
+		
+  public Modulo2(Compound compound) {
+    super(compound);
+    setInitial(l0);
+    addTransition(new TransitionConversation(l0, l1, null, r) { });
+    addTransition(new TransitionConversation(l1, l0, s, r) { });
+  }
+}
+
+public class Modulo8  extends Compound {
+  public Modulo8() {
+    // Behavior Component
+    Generator g = new Generator(this);
+		
+    // Conversation Components
+    Modulo2 R0 = new Modulo2(this, "R0");
+    Modulo2 R1 = new Modulo2(this, "R1");
+    Modulo2 R2 = new Modulo2(this, "R2");
+		
+    // Connections
+    R0.r.connect(g.s);
+    R1.r.connect(R0.s);
+    R2.r.connect(R1.s);
+  }
+}
+\end{lstlisting}
+\end{subfigure}%
+\quad
+\begin{subfigure}[b]{0.25\textwidth}
+\centering
+\scalebox{0.75}{\input{fig/modulo8.pdf_t}}
+\end{subfigure}
+\caption{Modulo-8 Counter in \compmodel}\label{fig:modulo8}
+\end{figure}
+
+Figure \ref{fig:modulo8} shows an example of Modulo-8 counter modeled using {\compmodel} model. 
+
+\subsection{Network Sorting Algorithm}
+\label{subsec:nsa}
+We consider $2^n$ behaviors, each containing an array of $N$ items. The goal is to sort the items, so that all the items in the first component are smaller than those of the second component and so on. Figure \ref{fig:nsa1} shows a {\compmodel} of the Network Sorting Algorithm for $n=3$.
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{fig/nsav1.pdf}
+\caption{Network Sorting Algorithm in {\compmodel}}\label{fig:nsa1}
+\end{figure} 
+We have also modeled another (see Fig. \ref{fig:nsa2}) version where we merge the Exchange and Finish behaviors. 
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.4]{fig/nsav2.pdf}
+\caption{Network Sorting Algorithm in {\compmodel} - Merged Exchange and Finish Conversations}\label{fig:nsa2}
 \end{figure}
 
 
-% *********************************************************************
-%\subsection{Request/Grant/Interrupt Formal Model}
-%\label{sec:internal:model}
-%\sidenote{Is this model necessary?}
-%Formal model with ``send request'' and ``receive grants''.
-%Transformation from conversations.
-%Semantic equivalence and, in particular, preservation of deadlock-freedom
-%(?).
+Figure \ref{bench:nsa} shows the performance of NSA by considering different scenarios. As NSA model requires deterministic conversation components, we have ran this model with the two implementations (deterministic and non-deterministic). Figure \ref{bench:nsa1} shows that the non-deterministic implementation introduces a negligible overhead. Also we have compared the effect of merging conversation components which might improve the performance. 
+We also study the efficiency of selecting all non-conflicting top conversation components before versus selecting only one top conversation component. Figure \ref{bench:nsa2} shows that selecting all non-conflicting top conversation components improve slightly the performance. 
+
+
+
+\begin{figure} \centering
+    \begin{subfigure}[b]{0.45\linewidth}
+        \includegraphics[scale=0.3]{bench/benchnsa1.pdf}
+        \caption{Deterministic vs. Non-Deterministic}\label{bench:nsa1}
+    \end{subfigure} %
+    \quad
+    \begin{subfigure}[b]{0.45\linewidth}    
+        \includegraphics[scale=0.3]{bench/benchnsa2.pdf}
+         \caption{One Top vs. Multiple-Top}\label{bench:nsa2}    
+    \end{subfigure} 
+    \caption{Performance (execution time in seconds) of NSA.}
+    \label{bench:nsa}
+\end{figure}
+
+\subsection{Case Study: POTS}
+\label{sec:pots}
+We consider Plain Old Telephone Service (POTS), which provides voice connections between pairs of clients. Figure \ref{fig:pots} shows POTS in {\compmodel} model. 
+
+\begin{figure} \centering
+        \scalebox{0.5}{\input{fig/pots.pdf_t}}
+        \caption{POTS in {\compmodel} model}\label{fig:pots}
+\end{figure}
+
+Figure \ref{bench:pots} shows the performance of POTS by varying the number of call to be satisfied.  
+
+\begin{figure} 
+\centering
+        \includegraphics[scale=0.4]{bench/benchpots.pdf}
+            \caption{Performance (execution time in seconds) of POTS.}
+\label{bench:pots}
+\end{figure}
+
 
