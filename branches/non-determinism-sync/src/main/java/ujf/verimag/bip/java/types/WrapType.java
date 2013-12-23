@@ -39,8 +39,9 @@ public class WrapType<T extends Object> {
 	
 	public void updateOriginalValue() {
 		int index = component.getIndexTransitionEnabled();
-		if(copyValues.containsKey(index))
+		if(copyValues.containsKey(index)) {
 			originalValue = copyValues.get(index);
+		}
 	}
 	
 	public T getValue() {
@@ -64,6 +65,10 @@ public class WrapType<T extends Object> {
 	
 	public void reset() {
 		copyValues.clear();
+	}
+	
+	public void setOriginalValue(T value) {
+		originalValue = value; 
 	}
 
 }

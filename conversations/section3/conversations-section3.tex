@@ -1,6 +1,6 @@
-\section{Java Implementation}
+\section{Experimental Results}
 \label{sec:java}
-We have implemented in Java a model consisting of a set of classes that represents {\compmodel} model. We distinguish mainly between two abstract classes \texttt{Behavior} and \texttt{Conversation}. You define a new behavior as follows:
+We have implemented in Java a model consisting of a set of classes that represents {\compmodel} model. We distinguish mainly between two abstract classes \texttt{Behavior} and \texttt{Conversation}. Defining a new behavior is done as follows:
 \begin{itemize}
 \item Create a new class that extends \texttt{Behavior} class. 
 \item Create instance variables that represent locations, data variables and send/request ports assigned with data variables.
@@ -102,11 +102,11 @@ We have also modeled another (see Fig. \ref{fig:nsa2}) version where we merge th
 \begin{figure}
 \centering
 \includegraphics[scale=0.4]{fig/nsav2.pdf}
-\caption{Network Sorting Algorithm in {\compmodel} - Merged Exchange and Finish Conversations}\label{fig:nsa2}
+\caption{Network Sorting Algorithm in {\compmodel} - Merging Exchange and Finish Conversations}\label{fig:nsa2}
 \end{figure}
 
 
-Figure \ref{bench:nsa} shows the performance of NSA by considering different scenarios. As NSA model requires deterministic conversation components, we have ran this model with the two implementations (deterministic and non-deterministic). Figure \ref{bench:nsa1} shows that the non-deterministic implementation introduces a negligible overhead. Also we have compared the effect of merging conversation components which might improve the performance. 
+Figure \ref{bench:nsa} shows the performance of NSA by considering different scenarios. As NSA model requires deterministic conversation components, we have ran this model with the two implementations (deterministic and non-deterministic). Figure \ref{bench:nsa1} shows that the non-deterministic implementation introduces some overhead. Also we have compared the effect of merging conversation components which might improve the performance. 
 We also study the efficiency of selecting all non-conflicting top conversation components before versus selecting only one top conversation component. Figure \ref{bench:nsa2} shows that selecting all non-conflicting top conversation components improve slightly the performance. 
 
 

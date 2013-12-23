@@ -69,13 +69,14 @@ public class EngineImpl implements Engine {
 	 * 
 	 */
 	public void compute() {
+		
 		while(updateTopEnableSyncComponent()) {
 			int random = (int) (Math.random() * topEnableSyncComponent.size());
 			SyncComponent currentSelected = topEnableSyncComponent.get(random);
-			currentSelected.propagateEnablePorts(componentEnablePort, currentSelected.getRandomTopTransitionEnable());
+			currentSelected.propagateEnablePorts(componentEnablePort, currentSelected.getRandomTopTransitionEnable(), true);
 			topEnableSyncComponentSelected.add(currentSelected);
 		}
-					
+							
 		if(topEnableSyncComponentSelected.size() == 0) {
 			for(BaseComponent component: compound.getBaseComponents())
 				component.getThread().interrupt();
@@ -97,6 +98,7 @@ public class EngineImpl implements Engine {
 				topEnableSyncComponent.add(syncComponent);
 			}
 		}
+		System.out.println();
 		return topEnableSyncComponent.size() > 0;
 	}
 	

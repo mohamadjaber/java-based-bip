@@ -245,12 +245,26 @@ public abstract class SyncComponent extends Component {
 		}
 	}
 	
-	public void propagateEnablePorts(Map<BaseComponent, SendPort> componentEnablePort, int index) {
+	/**
+	 * 
+	 * @param componentEnablePort
+	 * @param index
+	 * @param first - in case it is the first call, that is, it is the top sync component. 
+	 * 	In that case, we should use topTransitionsEnabled and not allTransitionsEnabled. 
+	 *  In the engine, when selected a top sync component we call progragateEnablePorts with first 
+	 *  	equl to true. 
+	 */
+	public void propagateEnablePorts(Map<BaseComponent, SendPort> componentEnablePort, int index, boolean first) {
 	
 		if(!checkIndex(index)) return; // index already executed
-	
 		indexToExecute = index; 
-		TransitionEnabled transitionEnabled = allTransitionsEnabled.get(indexToExecute);
+		
+		TransitionEnabled transitionEnabled;
+		if(first)
+			transitionEnabled = topTransitionsEnabled.get(indexToExecute);
+		else 
+			transitionEnabled = allTransitionsEnabled.get(indexToExecute);
+
 		TransitionSyncComponent transition = transitionEnabled.getTransition();
 		
 		setIndexTransitionEnabled(indexToExecute);
@@ -287,7 +301,7 @@ public abstract class SyncComponent extends Component {
 				sendPort.conflictReset();
 			}
 			else {
-				((SyncComponent) component).propagateEnablePorts(componentEnablePort, transitionEnabled.getBottomIndex(receivePorts[i]));
+				((SyncComponent) component).propagateEnablePorts(componentEnablePort, transitionEnabled.getBottomIndex(receivePorts[i]), false);
 			}
 		}
 	}
@@ -307,8 +321,10 @@ public abstract class SyncComponent extends Component {
 	private void setTopTransitionsEnabled() {
 		topTransitionsEnabled = new LinkedList<TransitionEnabled>();
 		for(TransitionEnabled t : allTransitionsEnabled) {
-			if(t.isEnabled() && (t.getTransition().getSendPort() == null || t.getTransition().getSendPort().getReceivePorts().size() == 0))
+			if(t.isEnabled() && (t.getTransition().getSendPort() == null 
+					|| t.getTransition().getSendPort().getReceivePorts().size() == 0)) {
 				topTransitionsEnabled.add(t); 
+			}
 		}
 	}
 	
