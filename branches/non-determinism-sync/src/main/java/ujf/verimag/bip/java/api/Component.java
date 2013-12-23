@@ -27,6 +27,7 @@ public abstract class Component {
 
 	
 	public Component(Compound compound) {
+		indexTransitionEnabled = -1; 
 		transitions = new HashSet<AbstractTransition>();
 		locations = new HashSet<Location>();
 		sendPorts = new HashSet<SendPort>();
