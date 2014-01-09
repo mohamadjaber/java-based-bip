@@ -98,7 +98,6 @@ public class EngineImpl implements Engine {
 				topEnableSyncComponent.add(syncComponent);
 			}
 		}
-		System.out.println();
 		return topEnableSyncComponent.size() > 0;
 	}
 	
