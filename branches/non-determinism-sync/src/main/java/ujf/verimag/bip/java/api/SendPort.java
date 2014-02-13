@@ -43,7 +43,7 @@ public class SendPort  {
 		for(AbstractTransition t : baseComponent.getCurrentLocation().getOutgoingTransition()) {
 			SendPort sendPort = t.getSendPort();
 			for(ReceivePort rcvPort: sendPort.receivePorts) {
-				rcvPort.getSyncComponent().upReset(sendPort);
+				rcvPort.getSyncComponent().upReset(this);
 			}
 		}
 	}
